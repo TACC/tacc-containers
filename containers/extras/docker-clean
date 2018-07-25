@@ -1,0 +1,9 @@
+#!/bin/bash
+
+[ -x "$(command -v yum)" ] && yum clean all
+[ -x "$(command -v apt-get)" ] && apt-get clean
+[ -x "$(command -v conda)" ] && conda clean -tipsy
+
+for dir in /tmp/* /var/tmp/* /home/jupyter/{.ccache,.cache/pip,conda-bld,.conda} /root/* /root/.[^.]* /var/lib/apt/lists/* /var/log/*; do
+	[ -e $dir ] && rm -rf $dir || true
+done
