@@ -1,4 +1,4 @@
-#Image: tacc-centos7-mvapich2.2
+#Image: gzynda/tacc-centos7-mvapich2.2
 #Version: 0.0.1
 
 FROM gzynda/tacc-centos7:0.0.1
@@ -14,7 +14,7 @@ ARG DIR=mvapich${MAJV}-${MAJV}.${MINV}
 
 # necessities and IB stack
 RUN yum -y groupinstall "Development tools" \
-    && yum -y install libgfortran libibmad-devel libibumad libibverbs-devel librdmacm
+    && yum -y install libgfortran libibmad-devel libibumad libibverbs-devel librdmacm libxml2-devel \
     && docker-clean
 
 # Install mvapich2-2.2

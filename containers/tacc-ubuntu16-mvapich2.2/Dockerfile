@@ -1,4 +1,4 @@
-#Image: tacc-ubuntu16-mvapich2.2
+#Image: gzynda/tacc-ubuntu16-mvapich2.2
 #Version: 0.0.1
 
 FROM gzynda/tacc-ubuntu16:0.0.1
@@ -10,7 +10,7 @@ FROM gzynda/tacc-ubuntu16:0.0.1
 # necessities and IB stack
 RUN apt-get update && \
     apt-get install -yq --no-install-recommends \
-        build-essential curl gfortran bison libibverbs-dev libibmad-dev libibumad-dev librdmacm-dev libmlx5-dev libmlx4-dev && \
+        build-essential curl gfortran bison libibverbs-dev libibmad-dev libibumad-dev librdmacm-dev libmlx5-dev libmlx4-dev libxml2-dev && \
     docker-clean
 
 # Install mvapich2-2.2

@@ -6,7 +6,7 @@ function getTags {
 	wget -q https://registry.hub.docker.com/v2/repositories/${image}/tags -O - | python -c '''
 import sys, json
 JS = json.load(sys.stdin)["results"]
-for record in JS: print record["name"]
+for record in JS: print(record["name"])
 ''' 2>/dev/null
 }
 function containsTag {
@@ -69,12 +69,15 @@ function buildImage {
 		ee "Could not find $DEP locally or on dockerhub. Please build it to build ${1}"
 	fi
 	echo "Starting ${IMG}:${VERSION}"
-	if containsTag $IMG $VERSION; then
+	if [ -z "$(docker images -q ${IMG}:${VERSION})" ] && containsTag $IMG $VERSION; then
+		ed "Found ${IMG}:${VERSION} on docker hub. Pulling to (hopefully) re-use layers"
+		ed "docker pull ${IMG}:${VERSION}"
+		docker pull ${IMG}:${VERSION}
 		# already exists
-		if ! askFalse "${VERSION} already exists for ${IMG} on dockerhub. Did you want to increment the version?"; then
-			echo -e "\nPlease increment \"Version:\" in $1/Dockerfile\n"
-			exit 0
-		fi
+		#if ! askFalse "${VERSION} already exists for ${IMG} on dockerhub. Did you want to increment the version?"; then
+		#	echo -e "\nPlease increment \"Version:\" in $1/Dockerfile\n"
+		#	exit 0
+		#fi
 	fi
 	ed "Building ${IMG}:${VERSION}"
 	prevInfo $IMG
@@ -94,43 +97,54 @@ function cleanImage {
 
 function pushImage {
 	# Builds an image
-	fileExists $1/Dockerfile
+	fileExists $1/$2/Dockerfile
 	cd $1
-	IMG=$(getVal Image:)
-	VERSION=$(getVal Version:)
-	echo ""
-	if askTrue "Do you want to push ${IMG}:${VERSION} to dockerhub?"; then
-		# Check if version already exists on dockerhub
-		if containsTag $IMG $VERSION; then
-			# If it does, should it be overwritten?
-			ew "the tag '${VERSION}' already exists for ${IMG} on dockerhub."
-			if ! askFalse "Do you want to overwrite it?"; then
-				ed "Overwriting dockerhub://${IMG}:${VERSION} with local version"
-				# Print info about previous tag
-				prevInfo $IMG
-				ed "docker push ${IMG}:${VERSION}"
-				docker push ${IMG}:${VERSION}
-				if [ ! $? -eq 0 ]; then
-					ee "Could not push notebook to dockerhub"
-				fi
-			else
-				echo "Please increment the 'Version:' in ${1}/Dockerfile and re-build"
-				exit 0
-			fi
-		else
-			prevInfo $IMG
-			ed "docker push ${IMG}:${VERSION}"
-			docker push ${IMG}:${VERSION}
+	IMG=$(getVal $2 Image:)
+	VERSION=$(getVal $2 Version:)
+#	if askTrue "Do you want to push ${IMG}:${VERSION} to dockerhub?"; then
+#		# Check if version already exists on dockerhub
+#		if containsTag $IMG $VERSION; then
+#			# If it does, should it be overwritten?
+#			ew "the tag '${VERSION}' already exists for ${IMG} on dockerhub."
+#			if ! askFalse "Do you want to overwrite it?"; then
+#				ed "Overwriting dockerhub://${IMG}:${VERSION} with local version"
+#				# Print info about previous tag
+#				prevInfo $IMG
+#				ed "docker push ${IMG}:${VERSION}"
+#				docker push ${IMG}:${VERSION}
+#				if [ ! $? -eq 0 ]; then
+#					ee "Could not push notebook to dockerhub"
+#				fi
+#			else
+#				echo "Please increment the 'Version:' in ${1}/Dockerfile and re-build"
+#				exit 0
+#			fi
+#		else
+#			prevInfo $IMG
+#			ed "docker push ${IMG}:${VERSION}"
+#			docker push ${IMG}:${VERSION}
+#			if [ ! $? -eq 0 ]; then
+#				ee "Could not push notebook to dockerhub"
+#			fi
+#		fi
+#	fi
+	prevInfo $IMG
+	ed "docker push ${IMG}:${VERSION}"
+	docker push ${IMG}:${VERSION}
+	if [ ! $? -eq 0 ]; then
+		ee "Could not push notebook to dockerhub"
+	fi
+	#if [ -n "$3" ] && askTrue "Do you want to tag ${IMG}:${VERSION} as ${3}?"; then
+	if [ -n "$3" ]; then
+		for tag in ${@:3}; do
+			ed "docker tag ${IMG}:${VERSION} ${IMG}:${tag}"
+			docker tag ${IMG}:${VERSION} ${IMG}:${tag}
+			ed "docker push ${IMG}:${tag}"
+			docker push ${IMG}:${tag}
 			if [ ! $? -eq 0 ]; then
 				ee "Could not push notebook to dockerhub"
 			fi
-		fi
-	fi
-	if askTrue "Do you want to tag ${IMG}:${VERSION} as ${2}?"; then
-		ed "docker tag ${IMG}:${VERSION} ${IMG}:${2}"
-		docker tag ${IMG}:${VERSION} ${IMG}:${2}
-		ed "docker push ${IMG}:${2}"
-		docker push ${IMG}:${2}
+		done
 	fi
 }
 
@@ -146,6 +160,9 @@ fi
 case $1 in
 build)
 	buildImage $2 $3
+	;;
+push)
+	pushImage $2 $3 ${@:4}
 	;;
 stage)
 	pushImage $2 $3 staging

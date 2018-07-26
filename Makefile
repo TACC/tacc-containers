@@ -1,7 +1,15 @@
-.PHONY: build test docker help stage release clean
+.PHONY: build test docker help stage release clean latest
 ifndef VERBOSE
-.SILENT: build test docker help stage release clean
+.SILENT: build test docker help stage release clean latest
 endif
+
+BASE := tacc-ubuntu16 tacc-centos7
+MPI := tacc-ubuntu16-mvapich2.2 tacc-centos7-mvapich2.2
+ALL := $(BASE) $(MPI)
+BUILD := scripts/build_docker.sh
+EDR := maverick wrangler
+OPA := stampede2 maverick2 hikari
+SYS := $(EDR) $(OPA) ls5
 
 docker:
 	docker info 1> /dev/null 2> /dev/null && \
@@ -10,88 +18,29 @@ docker:
 		exit 1; \
 	fi
 
-build: base-images
-
 tacc-ubuntu16: docker
-	scripts/build_docker.sh build containers $@
+	$(BUILD) build containers $@
+	$(BUILD) push containers $@ latest $(SYS)
 tacc-centos7: docker
-	scripts/build_docker.sh build containers $@
-base-images: tacc-ubuntu16 tacc-centos7
+	$(BUILD) build containers $@
+	$(BUILD) push containers $@ latest $(SYS)
+base-images: $(BASE)
 
 tacc-ubuntu16-mvapich2.2: tacc-ubuntu16
-	scripts/build_docker.sh build containers $@
-tacc-centos7-mvapich2.2: tacc-ubuntu16
-	scripts/build_docker.sh build containers $@
-mpi-images: tacc-ubuntu16-mvapich2.2 tacc-centos7-mvapich2.2
-	
+	$(BUILD) build containers $@
+	$(BUILD) push containers $@ latest $(EDR)
+tacc-centos7-mvapich2.2: tacc-centos7
+	$(BUILD) build containers $@
+	$(BUILD) push containers $@ latest $(EDR)
+mpi-images: $(MPI)
 
-build: docker
-	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
-	case $${TARGET} in \
-	base) \
-		build/build_jupyteruser.sh build images/base; \
-		;; \
-	sd2e) \
-		build/build_jupyteruser.sh build images/sd2e; \
-		;; \
-	singularity) \
-		build/build_jupyteruser.sh build images/singularity; \
-		;; \
-	*) \
-		$(MAKE) help; \
-		;; \
-	esac
-
-test: docker
-	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
-	case $$TARGET in \
-	base) \
-		build/build_jupyteruser.sh test images/base; \
-		;; \
-	sd2e) \
-		build/build_jupyteruser.sh test images/sd2e; \
-		;; \
-	singularity) \
-		build/build_jupyteruser.sh test images/singularity; \
-		;; \
-	*) \
-		$(MAKE) help; \
-		;; \
-	esac
-
-stage: docker
-	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
-	case $$TARGET in \
-	base) \
-		build/build_jupyteruser.sh stage images/base; \
-		;; \
-	sd2e) \
-		build/build_jupyteruser.sh stage images/sd2e; \
-		;; \
-	singularity) \
-		build/build_jupyteruser.sh stage images/singularity; \
-		;; \
-	*) \
-		$(MAKE) help; \
-		;; \
-	esac
-
-release: docker
-	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
-	case $$TARGET in \
-	base) \
-		build/build_jupyteruser.sh release images/base; \
-		;; \
-	sd2e) \
-		build/build_jupyteruser.sh release images/sd2e; \
-		;; \
-	singularity) \
-		build/build_jupyteruser.sh release images/singularity; \
-		;; \
-	*) \
-		$(MAKE) help; \
-		;; \
-	esac
+#latest: $(ALL)
+#	for i in $^; do $(BUILD) push containers $$i $@; done
+#maverick: $(MPI)
+#	for i in $^; do $(BUILD) push containers $$i $@; done
+#wrangler: $(MPI)
+#	for i in $^; do $(BUILD) push containers $$i $@; done
+#push: latest maverick wrangler
 
 clean: docker
 	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
