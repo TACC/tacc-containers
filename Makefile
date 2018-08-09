@@ -3,8 +3,8 @@ ifndef VERBOSE
 .SILENT: build test docker help stage release clean latest
 endif
 
-BASE := tacc-ubuntu16 tacc-centos7
-MPI := tacc-ubuntu16-mvapich2.2 tacc-centos7-mvapich2.2
+BASE := tacc-ubuntu16 tacc-centos7 tacc-ubuntu18
+MPI := tacc-ubuntu16-mvapich2.2 tacc-centos7-mvapich2.2 tacc-ubuntu16-mvapich2.3psm tacc-ubuntu18-mvapich2.3psm2
 ALL := $(BASE) $(MPI)
 BUILD := scripts/build_docker.sh
 EDR := maverick wrangler
@@ -20,27 +20,32 @@ docker:
 
 tacc-ubuntu16: docker
 	$(BUILD) build containers $@
-	$(BUILD) push containers $@ latest $(SYS)
+tacc-ubuntu18: docker
+	$(BUILD) build containers $@
 tacc-centos7: docker
 	$(BUILD) build containers $@
-	$(BUILD) push containers $@ latest $(SYS)
 base-images: $(BASE)
 
-tacc-ubuntu16-mvapich2.2: tacc-ubuntu16
+# Infiniband
+tacc-ubuntu16-mvapich2.2: | tacc-ubuntu16 docker
 	$(BUILD) build containers $@
-	$(BUILD) push containers $@ latest $(EDR)
-tacc-centos7-mvapich2.2: tacc-centos7
+tacc-centos7-mvapich2.2: | tacc-centos7 docker
 	$(BUILD) build containers $@
-	$(BUILD) push containers $@ latest $(EDR)
+# Intel OPA
+tacc-ubuntu16-mvapich2.3psm: | tacc-ubuntu16 docker
+	$(BUILD) build containers $@
+tacc-ubuntu18-mvapich2.3psm2: | tacc-ubuntu18 docker
+	$(BUILD) build containers $@
 mpi-images: $(MPI)
 
-#latest: $(ALL)
-#	for i in $^; do $(BUILD) push containers $$i $@; done
-#maverick: $(MPI)
-#	for i in $^; do $(BUILD) push containers $$i $@; done
-#wrangler: $(MPI)
-#	for i in $^; do $(BUILD) push containers $$i $@; done
-#push: latest maverick wrangler
+push: docker
+	$(BUILD) push containers tacc-ubuntu16 latest $(SYS)
+	$(BUILD) push containers tacc-ubuntu18 latest $(OPA)
+	$(BUILD) push containers tacc-centos7 latest $(SYS)
+	$(BUILD) push containers tacc-ubuntu16-mvapich2.2 latest $(EDR)
+	$(BUILD) push containers tacc-centos7-mvapich2.2 latest $(EDR)
+	$(BUILD) push containers tacc-ubuntu16-mvapich2.3psm latest $(OPA)
+	$(BUILD) push containers tacc-ubuntu18-mvapich2.3psm2 latest $(OPA)
 
 clean: docker
 	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
