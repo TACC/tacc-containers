@@ -14,4 +14,4 @@ RUN chmod a+rx /usr/bin/docker-clean && docker-clean
 # Add mount points
 ########################################
 
-RUN mkdir /scratch /work /home1 /gpfs /corral-repl /corral-tacc /data
+RUN mkdir /scratch /work /home1 /gpfs /corral-repl /corral-tacc /data /corral-secure

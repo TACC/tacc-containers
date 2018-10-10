@@ -17,7 +17,7 @@ function containsTag {
 }
 function getVal {
 	# Gets a YAML value from README.md
-	grep "$2" $1/Dockerfile | cut -f 2 -d ' '
+	grep "$2" $1 | cut -f 2 -d ' '
 }
 function ee {
 	# Echos to STDERR
@@ -60,7 +60,7 @@ function prevInfo {
 
 function buildImage {
 	# Builds an image
-	fileExists $1/$2/Dockerfile
+	fileExists $1/$2
 	cd $1
 	IMG=$(getVal $2 Image:)
 	VERSION=$(getVal $2 Version:)
@@ -81,8 +81,8 @@ function buildImage {
 	fi
 	ed "Building ${IMG}:${VERSION}"
 	prevInfo $IMG
-	ed "docker build --build-arg image_version=${VERSION} -t $IMG:${VERSION} -f $2/Dockerfile ."
-	! docker build --build-arg image_version=${VERSION} -t $IMG:${VERSION} -f $2/Dockerfile . && ee "Failed to build $IMG:$VERSION"
+	ed "docker build --build-arg image_version=${VERSION} -t $IMG:${VERSION} -f $2 ."
+	! docker build --build-arg image_version=${VERSION} -t $IMG:${VERSION} -f $2 . && ee "Failed to build $IMG:$VERSION"
 	ed "Finished ${IMG}:${VERSION}"
 }
 

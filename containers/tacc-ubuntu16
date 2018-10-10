@@ -1,8 +1,8 @@
-#Image: gzynda/tacc-ubuntu18
+#Image: gzynda/tacc-ubuntu16
 #Version: 0.0.1
 
-# Use 18.04 LTS
-FROM library/ubuntu:bionic
+# Use 16.04 LTS
+FROM library/ubuntu:xenial
 
 ########################################
 # Configure ENV
@@ -21,4 +21,4 @@ RUN chmod a+rx /usr/bin/docker-clean && docker-clean
 # Add mount points
 ########################################
 
-RUN mkdir /scratch /work /home1 /gpfs /corral-repl /corral-tacc /data
+RUN mkdir /scratch /work /home1 /gpfs /corral-repl /corral-tacc /data /corral-secure
