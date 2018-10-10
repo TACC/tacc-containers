@@ -42,7 +42,7 @@ push-base: docker
 ####################################
 # MPI Images
 ####################################
-MPI := $(shell echo tacc-{ubuntu16-ompi1.10.2,ubuntu18-ompi2.1.1,tacc-centos7-ompi3.0.0} tacc-{ubuntu16,ubuntu18,centos7}-mvapich2.3 tacc-{ubuntu18,centos7}-mvapich2.3psm2)
+MPI := $(shell echo tacc-{ubuntu16-ompi1.10.2,ubuntu18-ompi2.1.1,centos7-ompi3.0.0} tacc-{ubuntu16,ubuntu18,centos7}-mvapich2.3 tacc-{ubuntu18,centos7}-mvapich2.3psm2)
 # Open MPI
 tacc-ubuntu16-ompi1.10.2: | tacc-ubuntu16 docker
 	$(BUILD) build containers $@
@@ -63,6 +63,15 @@ tacc-ubuntu18-mvapich2.3psm2: | tacc-ubuntu18 docker
 tacc-centos7-mvapich2.3psm2: | tacc-centos7 docker
 	$(BUILD) build containers $@
 mpi-images: $(MPI)
+push-mpi: docker
+	$(BUILD) push containers tacc-ubuntu16-ompi1.10.2 latest $(SYS)
+	$(BUILD) push containers tacc-ubuntu18-ompi2.1.1 latest $(SYS)
+	$(BUILD) push containers tacc-centos7-ompi3.0.0 latest $(SYS)
+	$(BUILD) push containers tacc-ubuntu16-mvapich2.3 latest $(EDR)
+	$(BUILD) push containers tacc-ubuntu18-mvapich2.3 latest $(EDR)
+	$(BUILD) push containers tacc-centos7-mvapich2.3 latest $(EDR)
+	$(BUILD) push containers tacc-ubuntu18-mvapich2.3psm2 latest $(OPA)
+	$(BUILD) push containers tacc-centos7-mvapich2.3psm2 latest $(OPA)
 
 ####################################
 # CUDA Images

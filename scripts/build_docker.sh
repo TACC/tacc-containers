@@ -97,7 +97,7 @@ function cleanImage {
 
 function pushImage {
 	# Builds an image
-	fileExists $1/$2/Dockerfile
+	fileExists $1/$2
 	cd $1
 	IMG=$(getVal $2 Image:)
 	VERSION=$(getVal $2 Version:)
