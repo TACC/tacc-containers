@@ -1,17 +1,17 @@
-FROM gzynda/tacc-ubuntu18-mvapich2.3psm2:0.0.1
+ARG VER=latest
+FROM gzynda/tacc-ubuntu18-mvapich2.3-ib:${VER}
 
+# Install dependencies
 RUN apt-get update \
-	&& apt-get install -yq --no-install-recommends python3-dev git python3-pip \
-		cmake python3-setuptools python3-wheel python3-numpy python3-matplotlib \
-		python3-graphviz python3-scipy \
+	&& apt-get install -yq --no-install-recommends python3-dev python3-pip \
+		python3-setuptools python3-wheel python3-numpy \
 	&& docker-clean
 
-RUN ln -s /usr/bin/python3 /usr/local/bin/python \
-	&& ln -s /usr/bin/pip3 /usr/local/bin/pip
-
-RUN pip install mpi4py \
+RUN pip3 install mpi4py \
 	&& docker-clean
 
+# Add/compile application
 ADD run_julia.py /usr/local/bin/run_julia.py
 
-RUN chmod +x /usr/local/bin/run_julia.py
+# Make sure permissions are correct for singularity
+RUN chmod a+rx /usr/local/bin/run_julia.py

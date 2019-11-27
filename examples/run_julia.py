@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 from __future__ import division
@@ -10,9 +10,9 @@ from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor, MPIPoolExecutor
 
 try:
-    range = xrange
+	range = xrange
 except NameError:
-    pass
+	pass
 
 x0 = -2.0
 x1 = +2.0
@@ -26,65 +26,48 @@ dx = (x1 - x0) / w
 dy = (y1 - y0) / h
 
 def julia(x, y):
-    c = complex(0, 0.65)
-    z = complex(x, y)
-    n = 255
-    while abs(z) < 3 and n > 1:
-        z = z**2 + c
-        n -= 1
-    return n
+	c = complex(0, 0.65)
+	z = complex(x, y)
+	n = 255
+	while abs(z) < 3 and n > 1:
+		z = z**2 + c
+		n -= 1
+	return n
 
 def julia_line(k):
-    line = bytearray(w)
-    y = y1 - k * dy
-    for j in range(w):
-        x = x0 + j * dx
-        line[j] = julia(x, y)
-    return line
-
-def plot(image):
-    import warnings
-    warnings.simplefilter('ignore', UserWarning)
-    try:
-        from matplotlib import pyplot as plt
-    except ImportError:
-        return
-    plt.figure()
-    plt.imshow(image, aspect='equal', cmap='cubehelix')
-    plt.axis('off')
-    try:
-        plt.draw()
-        plt.pause(2)
-    except:
-        pass
+	line = bytearray(w)
+	y = y1 - k * dy
+	for j in range(w):
+		x = x0 + j * dx
+		line[j] = julia(x, y)
+	return line
 
 def test_julia_comm():
-    print("Loading Executor")
-    with MPICommExecutor(MPI.COMM_WORLD, root=0) as executor:
-        print("Loaded Executor")
-        if executor is None: return # worker process
-        tic = time.time()
-        image = list(executor.map(julia_line, range(h), chunksize=10))
-        toc = time.time()
-    print("%s - %s Set %dx%d in %.2f seconds." % (gethostname(), 'Julia', w, h, toc-tic))
+	with MPICommExecutor(MPI.COMM_WORLD, root=0) as executor:
+		if executor is None:
+			# worker process
+			return
+		print("Loaded Executor")
+		tic = time.time()
+		image = list(executor.map(julia_line, range(h), chunksize=10))
+		toc = time.time()
+		print("%s - %s Set %dx%d in %.2f seconds." % (gethostname(), 'Julia', w, h, toc-tic))
 def test_julia_pool():
-    print("Loading Executor")
-    with MPIPoolExecutor() as executor:
-        print("Loaded Executor")
-        tic = time.time()
-        image = list(executor.map(julia_line, range(h), chunksize=10))
-        toc = time.time()
-    print("%s - %s Set %dx%d in %.2f seconds." % (gethostname(), 'Julia', w, h, toc-tic))
+	with MPIPoolExecutor() as executor:
+		print("Loaded Executor")
+		tic = time.time()
+		image = list(executor.map(julia_line, range(h), chunksize=10))
+		toc = time.time()
+		print("%s - %s Set %dx%d in %.2f seconds." % (gethostname(), 'Julia', w, h, toc-tic))
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        if sys.argv[1] == 'pool':
-            print("Running POOL")
-            test_julia_pool()
-        else:
-            print("Running COMM")
-            test_julia_comm()
-    else:
-        print("Running COMM")
-        test_julia_comm()
-    #test_julia_pool()
+	if len(sys.argv) > 1:
+		if sys.argv[1] == 'pool':
+			print("Running POOL")
+			test_julia_pool()
+		else:
+			print("Running COMM")
+			test_julia_comm()
+	else:
+		print("Running COMM")
+		test_julia_comm()
