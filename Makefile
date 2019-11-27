@@ -3,12 +3,28 @@ ifndef VERBOSE
 .SILENT: build test docker help stage release clean latest
 endif
 
+VER := $(shell cat VERSION)
+ORG := tacc
 ALL := $(BASE) $(MPI)
 BUILD := scripts/build_docker.sh
-EDR := maverick wrangler
-OPA := stampede2 maverick2 hikari
+EDR := maverick wrangler hikari maverick2
+OPA := stampede2
 SYS := $(EDR) $(OPA) ls5
 
+BUILD = docker build --build-arg ORG=$(ORG) --build-arg VER=$(VER) --build-arg REL=$(@) -t $(ORG)/$@:$(VER) -f containers/$@
+TAG = docker tag $(ORG)/$@:$(VER) $(ORG)/$@:latest
+PUSH = docker push $(ORG)/$@:$(VER) && docker push $(ORG)/$@:latest
+
+####################################
+# CFLAGS
+####################################
+DEFAULT := -O2 -pipe -march=x86-64 -ftree-vectorize
+# Haswell doesn't exist in all gcc versions
+TACC := $(DEFAULT) -mtune=core-avx2
+
+####################################
+# Sanity checks
+####################################
 docker:
 	docker info 1> /dev/null 2> /dev/null && \
 	if [ ! $$? -eq 0 ]; then \
@@ -21,57 +37,48 @@ containers/extras/osu-micro-benchmarks-5.4.4.tar.gz:
 ####################################
 # Base Images
 ####################################
-BASE := $(shell echo tacc-{ubuntu16,centos7,ubuntu18})
-xenial:
-	docker pull ubuntu:xenial
+BASE := $(shell echo tacc-{ubuntu18,centos7})
+BASE_TEST = docker run --rm -it $(ORG)/$@:$(VER) bash -c 'echo $$CFLAGS | grep "pipe" && ls /etc/$@-release'
 bionic:
 	docker pull ubuntu:bionic
-tacc-ubuntu16: | docker xenial
-	$(BUILD) build containers $@
-tacc-ubuntu18: | docker bionic
-	$(BUILD) build containers $@
-tacc-centos7: | docker
-	$(BUILD) build containers $@
-
+centos7:
+	docker pull centos:7
+tacc-ubuntu18: containers/tacc-ubuntu18 | docker bionic
+	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers &> $@.log
+	$(BASE_TEST) >> $@.log 2>&1
+	$(TAG) >> $@.log 2>&1
+	$(PUSH) >> $@.log 2>&1
+tacc-centos7: containers/tacc-centos7 | docker centos7
+	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers &> $@.log
+	$(BASE_TEST) >> $@.log 2>&1
+	$(TAG) >> $@.log 2>&1
+	$(PUSH) >> $@.log 2>&1
 base-images: $(BASE)
-push-base: docker
-	$(BUILD) push containers tacc-ubuntu16 latest $(SYS)
-	$(BUILD) push containers tacc-ubuntu18 latest $(OPA)
-	$(BUILD) push containers tacc-centos7 latest $(SYS)
 
 ####################################
 # MPI Images
 ####################################
-MPI := $(shell echo tacc-{ubuntu16-ompi1.10.2,ubuntu18-ompi2.1.1,centos7-ompi3.0.0} tacc-{ubuntu16,ubuntu18,centos7}-mvapich2.3 tacc-{ubuntu18,centos7}-mvapich2.3psm2)
-# Open MPI
-tacc-ubuntu16-ompi1.10.2: | tacc-ubuntu16 docker
-	$(BUILD) build containers $@
-tacc-ubuntu18-ompi2.1.1: | tacc-ubuntu18 docker
-	$(BUILD) build containers $@
-tacc-centos7-ompi3.0.0: | tacc-centos7 docker
-	$(BUILD) build containers $@
-# Infiniband
-tacc-ubuntu16-mvapich2.3: | tacc-ubuntu16 docker
-	$(BUILD) build containers $@
-tacc-ubuntu18-mvapich2.3: | tacc-ubuntu18 docker
-	$(BUILD) build containers $@
-tacc-centos7-mvapich2.3: | tacc-centos7 docker
-	$(BUILD) build containers $@
-# Intel OPA
-tacc-ubuntu18-mvapich2.3psm2: | tacc-ubuntu18 docker
-	$(BUILD) build containers $@
-tacc-centos7-mvapich2.3psm2: | tacc-centos7 docker
-	$(BUILD) build containers $@
+MPI := $(shell echo tacc-{ubuntu18,centos7}-mvapich2.3-{ib,psm2})
+MPI_TEST = docker run --rm -it $(ORG)/$@:$(VER) bash -c 'which mpicc && ls /etc/$@-release'
+# IB
+%-mvapich2.3-ib: containers/%-mvapich2.3-ib | docker %
+	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers
+	$(MPI_TEST)
+	$(TAG)
+	$(PUSH)
+# PSM2
+%-mvapich2.3-psm2: containers/%-mvapich2.3-psm2 | docker %
+	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers
+	$(MPI_TEST)
+	$(TAG)
+	$(PUSH)
+#docker tag $(ORG)/$@:$(VER) $(ORG)/$@:stampede2
+#docker push $(ORG)/$@:stampede2
+#	for sys in hikari maverick2 wrangler; do \
+#		docker tag $(ORG)/$@:$(VER) $(ORG)/$@:$$sys \
+#		&& docker push $(ORG)/$@:$$sys; \
+#	done
 mpi-images: $(MPI)
-push-mpi: docker
-	$(BUILD) push containers tacc-ubuntu16-ompi1.10.2 latest $(SYS)
-	$(BUILD) push containers tacc-ubuntu18-ompi2.1.1 latest $(SYS)
-	$(BUILD) push containers tacc-centos7-ompi3.0.0 latest $(SYS)
-	$(BUILD) push containers tacc-ubuntu16-mvapich2.3 latest $(EDR)
-	$(BUILD) push containers tacc-ubuntu18-mvapich2.3 latest $(EDR)
-	$(BUILD) push containers tacc-centos7-mvapich2.3 latest $(EDR)
-	$(BUILD) push containers tacc-ubuntu18-mvapich2.3psm2 latest $(OPA)
-	$(BUILD) push containers tacc-centos7-mvapich2.3psm2 latest $(OPA)
 
 ####################################
 # CUDA Images
@@ -82,17 +89,12 @@ push-mpi: docker
 # Application Images
 ####################################
 
-# TODO: Delete system tags after pushing
-push: push-base push-mpi push-cuda push-apps
-	$(BUILD) push containers tacc-ubuntu16 latest $(SYS)
-	$(BUILD) push containers tacc-ubuntu18 latest $(OPA)
-	$(BUILD) push containers tacc-centos7 latest $(SYS)
-	$(BUILD) push containers tacc-ubuntu16-mvapich2.3 latest $(EDR)
-	$(BUILD) push containers tacc-centos7-mvapich2.2 latest $(EDR)
-	$(BUILD) push containers tacc-ubuntu16-mvapich2.3psm latest $(OPA)
-	$(BUILD) push containers tacc-ubuntu18-mvapich2.3psm2 latest $(OPA)
+clean-mpi: docker
+	docker rmi $(ORG)/tacc-{ubuntu18,centos7}-mvapich2.3-{ib,psm2}:{$(VER),latest}
 
-clean: docker
+clean: clean-mpi docker
+	docker system prune
+	docker rmi 
 	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
 	build/build_jupyteruser.sh clean images/singularity && \
 	build/build_jupyteruser.sh clean images/sd2e && \

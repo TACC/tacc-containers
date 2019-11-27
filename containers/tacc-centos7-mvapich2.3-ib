@@ -1,0 +1,63 @@
+ARG VER=latest
+ARG ORG=tacc
+FROM ${ORG}/tacc-centos7:${VER}
+
+########################################
+# BUILD Args
+########################################
+ARG FLAGS
+ARG VER
+ARG REL
+########################################
+# Configure ENV
+########################################
+ENV CFLAGS=${FLAGS}
+ENV CXXFLAGS=${FLAGS}
+RUN RF=/etc/${REL}-release; echo ${VER} > $RF && chmod a+r $RF
+
+########################################
+# Install mpi
+########################################
+
+# necessities and IB stack
+RUN yum -y install libgfortran libibmad-devel libibumad libibverbs-devel librdmacm libxml2-devel ca-certificates \
+    && docker-clean
+
+# Install mvapich2-2.3
+ARG MAJV=2
+ARG MINV=3
+ARG DIR=mvapich${MAJV}-${MAJV}.${MINV}
+
+RUN curl http://mvapich.cse.ohio-state.edu/download/mvapich/mv${MAJV}/${DIR}.tar.gz | tar -xzf - \
+    && cd ${DIR} \
+    && ./configure \
+	--with-device=ch3 \
+	--with-ch3-rank-bits=32 \
+	--enable-fortran=yes \
+	--enable-cxx=yes \
+	--enable-romio \
+	--enable-fast=O3 \
+    && make -j $(nproc --all 2>/dev/null || echo 2) \
+    && make install \
+    && cd ../ && rm -rf ${DIR} \
+    && rm -rf /usr/local/share/doc/mvapich2 \
+    && docker-clean
+
+# Add hello world
+ADD extras/hello.c /tmp/hello.c
+RUN mpicc /tmp/hello.c -o /usr/local/bin/hellow \
+    && rm /tmp/hello.c \
+    && docker-clean
+
+# Build benchmark programs
+ARG DIR=osu-micro-benchmarks-5.6.2
+RUN curl http://mvapich.cse.ohio-state.edu/download/mvapich/${DIR}.tar.gz | tar -xzf - \
+	&& cd ${DIR} \
+	&& ./configure --prefix=/opt/ CC=$(which mpicc) CXX=$(which mpicxx) \
+	&& make -j $(nproc --all 2>/dev/null || echo 2) && make install \
+	&& mv /opt/libexec/osu-micro-benchmarks/mpi /opt/osu-micro-benchmarks \
+	&& rm -rf /opt/libexec && find /opt \
+	&& cd ../ && rm -rf ${DIR} && docker-clean
+
+# Test installation
+RUN MV2_SMP_USE_CMA=0 mpirun -n 2 hellow

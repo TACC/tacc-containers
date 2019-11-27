@@ -1,7 +1,20 @@
-#Image: gzynda/tacc-centos7
-#Version: 0.0.1
+FROM centos:7
 
-FROM library/centos:7
+########################################
+# BUILD Args
+########################################
+
+ARG FLAGS
+ARG VER
+ARG REL
+
+########################################
+# Configure ENV
+########################################
+
+ENV CFLAGS=${FLAGS}
+ENV CXXFLAGS=${FLAGS}
+RUN RF=/etc/${REL}-release; echo ${VER} > $RF && chmod a+r $RF
 
 ########################################
 # Add docker-clean
@@ -9,6 +22,14 @@ FROM library/centos:7
 
 ADD extras/docker-clean /usr/bin/docker-clean
 RUN chmod a+rx /usr/bin/docker-clean && docker-clean
+
+########################################
+# Necessary packages
+########################################
+
+RUN yum -y groupinstall "Development tools"\
+	&& yum -y install curl which \
+	&& docker-clean
 
 ########################################
 # Add mount points

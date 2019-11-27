@@ -1,14 +1,22 @@
-#Image: gzynda/tacc-ubuntu18
-#Version: 0.0.1
-
 # Use 18.04 LTS
 FROM ubuntu:bionic
+
+########################################
+# BUILD Args
+########################################
+
+ARG FLAGS
+ARG VER
+ARG REL
 
 ########################################
 # Configure ENV
 ########################################
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CFLAGS=${FLAGS}
+ENV CXXFLAGS=${FLAGS}
+RUN RF=/etc/${REL}-release; echo ${VER} > $RF && chmod a+r $RF
 
 ########################################
 # Add docker-clean
@@ -16,6 +24,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ADD extras/docker-clean /usr/bin/docker-clean
 RUN chmod a+rx /usr/bin/docker-clean && docker-clean
+
+########################################
+# Necessary packages
+########################################
+
+RUN apt-get update \
+	&& apt-get install -yq --no-install-recommends curl build-essential \
+	&& docker-clean
 
 ########################################
 # Add mount points
