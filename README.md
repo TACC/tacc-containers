@@ -27,20 +27,10 @@ A curated set of starter containers for building containers to eventually run on
 
 ### Minimal base images
 
-<details style="border: 1px solid #aaa; border-radius: 4px; padding: .5em .5em 0;"><summary style="font-weight: bold; margin: -.5em -.5em 0; padding: .5em;">
-tacc/tacc-centos7</summary>
-* [Dockerfile](containers/tacc-centos7)
-* [Container](https://hub.docker.com/r/tacc/tacc-centos7)
-  * Singularity URL - `docker://tacc/tacc-centos7:latest`
-  * Docker URL - `tacc/tacc-centos7:latest`
-</details>
-<details style="border: 1px solid #aaa; border-radius: 4px; padding: .5em .5em 0;"><summary style="font-weight: bold; margin: -.5em -.5em 0; padding: .5em;">
-tacc/tacc-ubuntu18</summary>
-* [Dockerfile](containers/tacc-ubuntu18)
-* [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18)
-  * Singularity URL - `docker://tacc/tacc-ubuntu18:latest`
-  * Docker URL - `tacc/tacc-ubuntu18:latest`
-</details>
+* tacc/tacc-centos7
+  * [Dockerfile](containers/tacc-centos7) - [Container](https://hub.docker.com/r/tacc/tacc-centos7)
+* tacc/tacc-ubuntu18
+  * [Dockerfile](containers/tacc-ubuntu18) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18)
 
 These are the starting point for our downstream images, and the operating systems we support.
 They are meant to be extremely light and only contain the following:
