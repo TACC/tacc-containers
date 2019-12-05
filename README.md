@@ -2,22 +2,6 @@
 
 A curated set of starter containers for building containers to eventually run on TACC systems.
 
-<style>
-details {
-    border: 1px solid #aaa;
-    border-radius: 4px;
-    padding: .5em .5em 0;
-}
-
-summary {
-    font-weight: bold;
-    margin: -.5em -.5em 0;
-    padding: .5em;
-}
-</style>
-
-
-
 | Image                                   | Stampede2 | Maverick2 | Wrangler | Hikari | Local Dev |
 |-|:-:|:-:|:-:|:-:|:-:|
 | [gzynda/tacc-centos7](#minimal-base-images)                         | X | X | X | X | X |
@@ -43,13 +27,15 @@ summary {
 
 ### Minimal base images
 
-<details><summary>tacc/tacc-centos7</summary>
+<details style="border: 1px solid #aaa; border-radius: 4px; padding: .5em .5em 0;"><summary style="font-weight: bold; margin: -.5em -.5em 0; padding: .5em;">
+tacc/tacc-centos7</summary>
 * [Dockerfile](containers/tacc-centos7)
 * [Container](https://hub.docker.com/r/tacc/tacc-centos7)
   * Singularity URL - `docker://tacc/tacc-centos7:latest`
   * Docker URL - `tacc/tacc-centos7:latest`
 </details>
-<details><summary>tacc/tacc-ubuntu18</summary>
+<details style="border: 1px solid #aaa; border-radius: 4px; padding: .5em .5em 0;"><summary style="font-weight: bold; margin: -.5em -.5em 0; padding: .5em;">
+tacc/tacc-ubuntu18</summary>
 * [Dockerfile](containers/tacc-ubuntu18)
 * [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18)
   * Singularity URL - `docker://tacc/tacc-ubuntu18:latest`
