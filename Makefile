@@ -55,6 +55,9 @@ tacc-centos7: containers/tacc-centos7 | docker centos7
 	$(PUSH) >> $@.log 2>&1
 base-images: $(BASE)
 
+clean-base: | docker
+	docker rmi $(ORG)/tacc-{ubuntu18,centos7}:{$(VER),latest}
+
 ####################################
 # MPI Images
 ####################################
@@ -80,6 +83,8 @@ MPI_TEST = docker run --rm -it $(ORG)/$@:$(VER) bash -c 'which mpicc && ls /etc/
 #	done
 mpi-images: $(MPI)
 
+clean-mpi: | docker
+	docker rmi $(ORG)/tacc-{ubuntu18,centos7}-mvapich2.3-{ib,psm2}:{$(VER),latest}
 ####################################
 # CUDA Images
 ####################################
@@ -89,13 +94,8 @@ mpi-images: $(MPI)
 # Application Images
 ####################################
 
-clean-mpi: docker
-	docker rmi $(ORG)/tacc-{ubuntu18,centos7}-mvapich2.3-{ib,psm2}:{$(VER),latest}
-
-clean: clean-mpi docker
+all: base-images mpi-images
 	docker system prune
-	docker rmi 
-	TARGET=$(filter-out $@,$(MAKECMDGOALS)) && \
-	build/build_jupyteruser.sh clean images/singularity && \
-	build/build_jupyteruser.sh clean images/sd2e && \
-	build/build_jupyteruser.sh clean images/base
+
+clean: clean-mpi clean-base | docker
+	docker system prune

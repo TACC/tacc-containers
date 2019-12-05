@@ -2,6 +2,20 @@
 
 A curated set of starter containers for building containers to eventually run on TACC systems.
 
+<style>
+details {
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: .5em .5em 0;
+}
+
+summary {
+    font-weight: bold;
+    margin: -.5em -.5em 0;
+    padding: .5em;
+}
+</style>
+
 
 
 | Image                                   | Stampede2 | Maverick2 | Wrangler | Hikari | Local Dev |
@@ -28,8 +42,19 @@ A curated set of starter containers for building containers to eventually run on
 ## Container Descriptions
 
 ### Minimal base images
-* [gzynda/tacc-centos7](containers/tacc-centos7)
-* [gzynda/tacc-ubuntu18](containers/tacc-ubuntu18)
+
+<details><summary>tacc/tacc-centos7</summary>
+* [Dockerfile](containers/tacc-centos7)
+* [Container](https://hub.docker.com/r/tacc/tacc-centos7)
+  * Singularity URL - `docker://tacc/tacc-centos7:latest`
+  * Docker URL - `tacc/tacc-centos7:latest`
+</details>
+<details><summary>tacc/tacc-ubuntu18</summary>
+* [Dockerfile](containers/tacc-ubuntu18)
+* [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18)
+  * Singularity URL - `docker://tacc/tacc-ubuntu18:latest`
+  * Docker URL - `tacc/tacc-ubuntu18:latest`
+</details>
 
 These are the starting point for our downstream images, and the operating systems we support.
 They are meant to be extremely light and only contain the following:
@@ -43,15 +68,15 @@ They are meant to be extremely light and only contain the following:
 
 > The architecture flags in our `$CFLAGS` are not more system specific due to the age of the system compilers. As we support newer operating systems, those flags will better match the contemporary hardware at TACC
 
-### Infiniband base MPI images
+### InfiniBand base MPI images
 * [gzynda/tacc-centos7-mvapich2.3-ib](containers/tacc-centos7-mvapich2.3-ib)
 * [gzynda/tacc-ubuntu18-mvapich2.3-ib](containers/tacc-ubuntu18-mvapich2.3-ib)
 
 Each image starts from their respective minimal base, and inherits those base features.
-The goal of these images is to provide a base MPI development environment that will work on our Infiniband systems, and will specifically contain the following:
+The goal of these images is to provide a base MPI development environment that will work on our InfiniBand systems, and will specifically contain the following:
 
 * Version recorded in /etc/tacc-[OS]-mvapich2.3-ib for troubleshooting
-* Infiniband system development libraries
+* InfiniBand system development libraries
 * [MVAPICH2 v2.3](http://mvapich.cse.ohio-state.edu/downloads/)
 * [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
@@ -66,7 +91,7 @@ Each image starts from their respective minimal base, and inherits those base fe
 The goal of these images is to provide a base MPI development environment that will work on our [Intel Omni-Path](https://www.intel.com/content/www/us/en/high-performance-computing-fabrics/omni-path-driving-exascale-computing.html) (psm2) systems, and will specifically contain the following:
 
 * Version recorded in /etc/tacc-[OS]-mvapich2.3-psm2 for troubleshooting
-* Infiniband system development libraries
+* InfiniBand system development libraries
 * [PSM2 development library](https://github.com/intel/opa-psm2)
 * [MVAPICH2 v2.3](http://mvapich.cse.ohio-state.edu/downloads/)
   * configured with `--with-device=ch3:psm`
@@ -132,7 +157,7 @@ TACC: Shutdown complete. Exiting.
 
 In the [examples](examples) directory, we have a file called `run_julia.py`, which computes the [Julia set](https://en.wikipedia.org/wiki/Julia_set) and was adapted from one of [mpi4py's examples](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#examples).
 
-To build a container to run `run_julia.py` on an Infiniband system at TACC, a new Docker container needs to be built with the following requirements:
+To build a container to run `run_julia.py` on an InfiniBand system at TACC, a new Docker container needs to be built with the following requirements:
 
 * Starts **FROM** `tacc-[OS]-mvapich2.3-ib`
 * Installs necessary python dependencies
@@ -166,7 +191,7 @@ You can either manually recreate this, or take advantage of the provided `Makefi
 $ make ORG=[your dockerhub username] julia
 ```
 
-After the image is done being pushed to dockerhub, you can pull it down to the Infiniband system of your choice.
+After the image is done being pushed to dockerhub, you can pull it down to the InfiniBand system of your choice.
 
 ```
 $ idev -N 2 -n 4
@@ -293,6 +318,14 @@ TODO
 * [mpi4py.futures](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html) fails on `*psm2` - please submit a pull request if you find a solution
 * [MPIPoolExecutor](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor) failes on `*ib` - please submit a pull request if you find a solution
 * `*psm2` containers cannot run locally
+* Running with `MV2_ENABLE_AFFINITY=0` in your environment is sometimes required for some code if it fails and you see the following warning <blockquote>
+```
+Warning: Process to core binding is enabled and OMP_NUM_THREADS is set to non-zero (1) value
+If your program has OpenMP sections, this can cause over-subscription of cores and consequently poor performance
+To avoid this, please re-run your application after setting MV2_ENABLE_AFFINITY=0
+Use MV2_USE_THREAD_WARNING=0 to suppress this message
+```
+</blockquote>
 
 ## Frequently asked questions
 

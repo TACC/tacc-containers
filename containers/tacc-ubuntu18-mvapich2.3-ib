@@ -13,7 +13,7 @@ ARG REL
 ########################################
 ENV CFLAGS=${FLAGS}
 ENV CXXFLAGS=${FLAGS}
-ENV MV2_ENABLE_AFFINITY=0
+#ENV MV2_ENABLE_AFFINITY=0
 RUN RF=/etc/${REL}-release; echo ${VER} > $RF && chmod a+r $RF
 
 ########################################
