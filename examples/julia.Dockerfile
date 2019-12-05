@@ -1,5 +1,5 @@
 ARG VER=latest
-FROM gzynda/tacc-ubuntu18-mvapich2.3-ib:${VER}
+FROM tacc/tacc-ubuntu18-mvapich2.3-ib:${VER}
 
 # Install dependencies
 RUN apt-get update \

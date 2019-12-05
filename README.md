@@ -4,12 +4,12 @@ A curated set of starter containers for building containers to eventually run on
 
 | Image                                   | Stampede2 | Maverick2 | Wrangler | Hikari | Local Dev |
 |-|:-:|:-:|:-:|:-:|:-:|
-| [gzynda/tacc-centos7](#minimal-base-images)                         | X | X | X | X | X |
-| [gzynda/tacc-centos7-mvapich2.3-ib](#infiniband-base-mpi-images)    |   | X | X | X | X |
-| [gzynda/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mpi-images)   | X |   |   |   |   |
-| [gzynda/tacc-ubuntu18](#minimal-base-images)                        | X | X | X | X | X |
-| [gzynda/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mpi-images)   |   | X | X | X | X |
-| [gzynda/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mpi-images)  | X |   |   |   |   |
+| [tacc/tacc-centos7](#minimal-base-images)                         | X | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mpi-images)    |   | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mpi-images)   | X |   |   |   |   |
+| [tacc/tacc-ubuntu18](#minimal-base-images)                        | X | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mpi-images)   |   | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mpi-images)  | X |   |   |   |   |
 
 ## Contents
 
@@ -45,8 +45,11 @@ They are meant to be extremely light and only contain the following:
 > The architecture flags in our `$CFLAGS` are not more system specific due to the age of the system compilers. As we support newer operating systems, those flags will better match the contemporary hardware at TACC
 
 ### InfiniBand base MPI images
-* [gzynda/tacc-centos7-mvapich2.3-ib](containers/tacc-centos7-mvapich2.3-ib)
-* [gzynda/tacc-ubuntu18-mvapich2.3-ib](containers/tacc-ubuntu18-mvapich2.3-ib)
+
+* tacc/tacc-centos7-mvapich2.3-ib
+  * [Dockerfile](containers/tacc-centos7-mvapich2.3-ib) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-mvapich2.3-ib)
+* tacc/tacc-ubuntu18-mvapich2.3-ib
+  * [Dockerfile](containers/tacc-ubuntu18-mvapich2.3-ib) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18-mvapich2.3-ib)
 
 Each image starts from their respective minimal base, and inherits those base features.
 The goal of these images is to provide a base MPI development environment that will work on our InfiniBand systems, and will specifically contain the following:
@@ -60,8 +63,11 @@ The goal of these images is to provide a base MPI development environment that w
   * Not on system `$PATH`
 
 ### Omni-Path base MPI images
-* [gzynda/tacc-centos7-mvapich2.3-psm2](containers/tacc-centos7-mvapich2.3-psm2)
-* [gzynda/tacc-ubuntu18-mvapich2.3-psm2](containers/tacc-ubuntu18-mvapich2.3-psm2)
+
+* tacc/tacc-centos7-mvapich2.3-psm2
+  * [Dockerfile](containers/tacc-centos7-mvapich2.3-psm2) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-mvapich2.3-psm2)
+* tacc/tacc-ubuntu18-mvapich2.3-psm2
+  * [Dockerfile](containers/tacc-ubuntu18-mvapich2.3-psm2) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18-mvapich2.3-psm2)
 
 Each image starts from their respective minimal base, and inherits those base features.
 The goal of these images is to provide a base MPI development environment that will work on our [Intel Omni-Path](https://www.intel.com/content/www/us/en/high-performance-computing-fabrics/omni-path-driving-exascale-computing.html) (psm2) systems, and will specifically contain the following:
@@ -75,6 +81,8 @@ The goal of these images is to provide a base MPI development environment that w
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
   * Installed in /opt/osu-micro-benchmarks
   * Not on system `$PATH`
+
+Please note that while you can build software in these images, they will **not** run on systems without Omni-Path devices, which probably includes your development system.
 
 ## Running on TACC
 Mult-node jobs need to be invoked with the system `ibrun`.
@@ -91,7 +99,7 @@ $ idev -N 2 -n 2
 $ module load tacc-singularity
 
 # Pull your desired image
-$ singularity pull docker://gzynda/tacc-centos7-mvapich2.3-psm2:latest
+$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest
 
 # Run Hello World
 $ ibrun singularity exec tacc-centos7-mvapich2.3-psm2_latest.sif hellow
@@ -112,7 +120,7 @@ $ idev -N 2 -n 2
 $ module load tacc-singularity
 
 # Pull your desired image
-$ singularity pull docker://gzynda/tacc-centos7-mvapich2.3-ib:latest
+$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-ib:latest
 
 # Run Hello World
 $ ibrun singularity exec tacc-centos7-mvapich2.3-ib_latest.sif hellow
@@ -143,7 +151,7 @@ To build a container to run `run_julia.py` on an InfiniBand system at TACC, a ne
 
 ```
 ARG VER=latest
-FROM gzynda/tacc-ubuntu18-mvapich2.3-ib:${VER}
+FROM tacc/tacc-ubuntu18-mvapich2.3-ib:${VER}
 
 # Install dependencies
 RUN apt-get update \
