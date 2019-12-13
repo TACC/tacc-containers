@@ -89,6 +89,16 @@ Mult-node jobs need to be invoked with the system `ibrun`.
 
 > Single-node, multi-core applications _can_ be invoked with the container's `mpirun`, but we do not recommend it unless absolutely necessary.
 
+**NOTE:** large MPI applications must be run on our high-performance filesystems (not $WORK) in the following manner:
+
+1. Pull container once, using a single process <br>
+`idev -N 1; singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest`
+2. Move the container to a high-performance filesystem like `$SCRATCH` or maybe `$HOME` <br>
+`mv tacc-centos7-mvapich2.3-psm2_latest.sif $SCRATCH/`
+   * You could also `sbcast` the image to `/tmp` inside a job
+3. Launch MPI application <br>
+`cd $SCRATCH; idev -N 2; ibrun singularity exec tacc-centos7-mvapich2.3-psm2_latest.sif hellow`
+
 ### Stampede 2
 
 ```bash
