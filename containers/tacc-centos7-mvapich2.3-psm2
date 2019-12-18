@@ -27,7 +27,8 @@ RUN yum -y install libgfortran libibmad-devel libibumad libibverbs-devel librdma
 # Install mvapich2-2.3
 ARG MAJV=2
 ARG MINV=3
-ARG DIR=mvapich${MAJV}-${MAJV}.${MINV}
+ARG BV=.1
+ARG DIR=mvapich${MAJV}-${MAJV}.${MINV}${BV}
 
 RUN curl http://mvapich.cse.ohio-state.edu/download/mvapich/mv${MAJV}/${DIR}.tar.gz | tar -xzf - \
     && cd ${DIR} \

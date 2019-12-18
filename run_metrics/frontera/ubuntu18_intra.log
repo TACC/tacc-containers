@@ -1,0 +1,34 @@
+TACC:  Starting up job 222379 
+TACC:  Starting parallel tasks... 
+Hello world!  I am process-0 on host c145-022.frontera.tacc.utexas.edu
+Hello world!  I am process-1 on host c145-022.frontera.tacc.utexas.edu
+TACC:  Shutdown complete. Exiting. 
+TACC:  Starting up job 222379 
+TACC:  Starting parallel tasks... 
+# OSU MPI Latency Test v5.6.2
+# Size          Latency (us)
+0                       0.21
+1                       0.21
+2                       0.22
+4                       0.22
+8                       0.21
+16                      0.22
+32                      0.22
+64                      0.24
+128                     0.27
+256                     0.31
+512                     0.40
+1024                    0.49
+2048                    0.63
+4096                    0.95
+8192                    1.87
+16384                   3.27
+32768                   5.32
+65536                   4.64
+131072                  8.12
+262144                 15.46
+524288                 32.34
+1048576                80.25
+2097152               214.86
+4194304               437.29
+TACC:  Shutdown complete. Exiting. 

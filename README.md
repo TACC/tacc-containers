@@ -2,14 +2,14 @@
 
 A curated set of starter containers for building containers to eventually run on TACC systems.
 
-| Image                                   | Stampede2 | Maverick2 | Wrangler | Hikari | Local Dev |
+| Image                                                             | Frontera | Stampede2 | Maverick2 | Wrangler | Hikari | Local Dev |
 |-|:-:|:-:|:-:|:-:|:-:|
-| [tacc/tacc-centos7](#minimal-base-images)                         | X | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mpi-images)    |   | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mpi-images)   | X |   |   |   |   |
-| [tacc/tacc-ubuntu18](#minimal-base-images)                        | X | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mpi-images)   |   | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mpi-images)  | X |   |   |   |   |
+| [tacc/tacc-centos7](#minimal-base-images)                         | X | X | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mpi-images)    | X |   | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mpi-images)   |   | X |   |   |   |   |
+| [tacc/tacc-ubuntu18](#minimal-base-images)                        | X | X | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mpi-images)   | X |   | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mpi-images)  |   | X |   |   |   |   |
 
 ## Contents
 
@@ -276,6 +276,39 @@ $ ibrun singularity exec tacc-ubuntu18-mvapich2.3-ib_latest.sif /opt/osu-micro-b
 
 </details>
 
+### Frontera Performance
+
+| Size    | inter-native | inter-centos7 | inter-ubuntu18 | intra-native | intra-centos7 | intra-ubuntu18 | 
+|---------|--------------|---------------|----------------|--------------|---------------|----------------| 
+| 0       | 1.15         | 1.16          | 1.16           | 0.42         | 0.22          | 0.21           | 
+| 1       | 1.14         | 1.2           | 1.19           | 0.4          | 0.22          | 0.21           | 
+| 2       | 1.14         | 1.19          | 1.19           | 0.4          | 0.22          | 0.22           | 
+| 4       | 1.14         | 1.19          | 1.19           | 0.4          | 0.22          | 0.22           | 
+| 8       | 1.13         | 1.19          | 1.19           | 0.4          | 0.22          | 0.21           | 
+| 16      | 1.13         | 1.23          | 1.22           | 0.41         | 0.23          | 0.22           | 
+| 32      | 1.15         | 1.23          | 1.22           | 0.42         | 0.25          | 0.22           | 
+| 64      | 1.2          | 1.23          | 1.22           | 0.42         | 0.27          | 0.24           | 
+| 128     | 1.22         | 1.28          | 1.27           | 0.51         | 0.3           | 0.27           | 
+| 256     | 1.7          | 1.69          | 1.69           | 0.59         | 0.32          | 0.31           | 
+| 512     | 1.53         | 1.77          | 1.78           | 0.79         | 0.4           | 0.4            | 
+| 1024    | 1.7          | 1.93          | 1.93           | 0.88         | 0.51          | 0.49           | 
+| 2048    | 2.25         | 2.3           | 2.31           | 1.03         | 0.66          | 0.63           | 
+| 4096    | 3            | 3.4           | 3.36           | 1.48         | 1             | 0.95           | 
+| 8192    | 3.98         | 4.56          | 4.64           | 1.94         | 1.7           | 1.87           | 
+| 16384   | 5.49         | 7.36          | 7.39           | 3.27         | 3.09          | 3.27           | 
+| 32768   | 9.76         | 9.53          | 9.54           | 4.69         | 4.86          | 5.32           | 
+| 65536   | 12.74        | 12.43         | 12.44          | 7.81         | 4.06          | 4.64           | 
+| 131072  | 18.44        | 21.63         | 21.55          | 13.78        | 6.79          | 8.12           | 
+| 262144  | 33.23        | 32.55         | 32.47          | 25.86        | 12.43         | 15.46          | 
+| 524288  | 56.55        | 54.73         | 54.28          | 60.53        | 26.54         | 32.34          | 
+| 1048576 | 100.07       | 96.91         | 97.03          | 117.08       | 81.49         | 80.25          | 
+| 2097152 | 184.95       | 182.18        | 185.47         | 226.64       | 207.01        | 214.86         | 
+| 4194304 | 356.57       | 352.09        | 352.55         | 447.13       | 431.6         | 437.29         | 
+
+[Full run logs](run_metrics/frontera)
+
+### Legacy Performance
+
 | Size    | S2 Native | centos7-psm2 | ubuntu18-psm2 | Hikari Native | centos7-ib | ubuntu18-ib |
 |---------|----------:|-------------:|--------------:|--------------:|-----------:|------------:|
 | 0       | 4.09      | 2.63         | 2.95          | 1.27          | 0.23       | 0.19        |
@@ -311,6 +344,7 @@ TODO
 
 * [mpi4py.futures](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html) fails on `*psm2` - please submit a pull request if you find a solution
 * [MPIPoolExecutor](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor) failes on `*ib` - please submit a pull request if you find a solution
+  * Still true with mvapich 2.3.1 in release 0.0.3
 * `*psm2` containers cannot run locally
 * Running with `MV2_ENABLE_AFFINITY=0` in your environment is sometimes required for some code if it fails and you see the following warning <blockquote>
 ```
