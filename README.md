@@ -4,12 +4,16 @@ A curated set of starter containers for building containers to eventually run on
 
 | Image                                                             | Frontera | Stampede2 | Maverick2 | Wrangler | Hikari | Local Dev |
 |-|:-:|:-:|:-:|:-:|:-:|:-:|
-| [tacc/tacc-centos7](#minimal-base-images)                         | X | X | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mpi-images)    | X |   | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mpi-images)   |   | X |   |   |   |   |
-| [tacc/tacc-ubuntu18](#minimal-base-images)                        | X | X | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mpi-images)   | X |   | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mpi-images)  |   | X |   |   |   |   |
+| [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |   |   |
+| [tacc/tacc-centos7-impi19.0.5-ib](#infiniband-base-impi-images)        | X |   |   |   |   |   |
+| [tacc/tacc-centos7-impi18.0.2-psm2](#omni-path-base-impi-images)       |   | X |   |   |   |   |
+| [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |   |   |
+| [tacc/tacc-ubuntu18-impi19.0.5-ib](#infiniband-base-impi-images)       | X |   |   |   |   |   |
+| [tacc/tacc-ubuntu18-impi18.0.2-psm2](#omni-path-base-impi-images)      |   | X |   |   |   |   |
 
 ## Contents
 
@@ -44,7 +48,7 @@ They are meant to be extremely light and only contain the following:
 
 > The architecture flags in our `$CFLAGS` are not more system specific due to the age of the system compilers. As we support newer operating systems, those flags will better match the contemporary hardware at TACC
 
-### InfiniBand base MPI images
+### InfiniBand base MVAPICH2 images
 
 * tacc/tacc-centos7-mvapich2.3-ib
   * [Dockerfile](containers/tacc-centos7-mvapich2.3-ib) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-mvapich2.3-ib)
@@ -62,7 +66,7 @@ The goal of these images is to provide a base MPI development environment that w
   * Installed in /opt/osu-micro-benchmarks
   * Not on system `$PATH`
 
-### Omni-Path base MPI images
+### Omni-Path base MVAPICH2 images
 
 * tacc/tacc-centos7-mvapich2.3-psm2
   * [Dockerfile](containers/tacc-centos7-mvapich2.3-psm2) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-mvapich2.3-psm2)
@@ -83,6 +87,54 @@ The goal of these images is to provide a base MPI development environment that w
   * Not on system `$PATH`
 
 Please note that while you can build software in these images, they will **not** run on systems without Omni-Path devices, which probably includes your development system.
+
+### InfiniBand base Intel MPI images
+
+* tacc/tacc-centos7-impi19.0.5-ib
+  * [Dockerfile](containers/tacc-centos7-impi19.0.5-ib) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-impi19.0.5-ib)
+* tacc/tacc-ubuntu18-impi19.0.5-ib
+  * [Dockerfile](containers/tacc-ubuntu18-impi19.0.5-ib) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18-impi19.0.5-ib)
+
+Each image starts from their respective minimal base, and inherits those base features.
+The goal of these images is to provide a base MPI development environment that will work on our InfiniBand systems, and will specifically contain the following:
+
+* Version recorded in /etc/tacc-[OS]-impi19.0.5-ib for troubleshooting
+* InfiniBand system development libraries
+* [Mellanox OpenFabrics Enterprise Distribution](https://www.mellanox.com/support/mlnx-ofed-public-repository)
+* [Intel MPI 19.0.5](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html)
+* [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
+* [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
+  * Installed in /opt/osu-micro-benchmarks
+  * Not on system `$PATH`
+* docker-entrypoint.sh - To initialize necessary environment variables for Intel MPI.
+
+Please note that you will need to use `singularity run` to get the `docker-entrypoint.sh` invoked properly under Singularity. 
+
+### Omni-Path base Intel MPI images
+
+* tacc/tacc-centos7-impi18.0.2-psm2
+  * [Dockerfile](containers/tacc-centos7-impi18.0.2-psm2) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-impi18.0.2-psm2)
+* tacc/tacc-ubuntu18-impi18.0.2-psm2
+  * [Dockerfile](containers/tacc-ubuntu18-impi18.0.2-psm2) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18-impi18.0.2-psm2)
+
+Each image starts from their respective minimal base, and inherits those base features.
+The goal of these images is to provide a base MPI development environment that will work on our [Intel Omni-Path](https://www.intel.com/content/www/us/en/high-performance-computing-fabrics/omni-path-driving-exascale-computing.html) (psm2) systems, and will specifically contain the following:
+
+* Version recorded in /etc/tacc-[OS]-impi18.0.2-psm2 for troubleshooting
+* InfiniBand system development libraries
+* [PSM2 development library](https://github.com/intel/opa-psm2)
+* [OpenFabrics Interfaces](https://github.com/ofiwg/libfabric)
+* [Intel MPI 18.0.2](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-apt-repo.html)
+* [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
+* [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
+  * Installed in /opt/osu-micro-benchmarks
+  * Not on system `$PATH`
+* docker-entrypoint.sh - To initialize necessary environment variables for Intel MPI.
+* [A patch for strtok_r](containers/extras/strtok_fix.c) is included in the Ubuntu image to fix a bug due incompatible GNU C Library 
+
+Please note that while you can build software in these images, they will **not** run on systems without Omni-Path devices, which probably includes your development system.
+
+Please note that you will need to use `singularity run` to get the `docker-entrypoint.sh` invoked properly under Singularity. 
 
 ## Running on TACC
 Mult-node jobs need to be invoked with the system `ibrun`.
