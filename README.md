@@ -103,7 +103,7 @@ The goal of these images is to provide a base MPI development environment that w
 * Version recorded in /etc/tacc-[OS]-impi19.0.5-ib for troubleshooting
 * InfiniBand system development libraries
 * [Mellanox OpenFabrics Enterprise Distribution](https://www.mellanox.com/support/mlnx-ofed-public-repository)
-* [Intel MPI 19.0.5](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html)
+* Intel MPI 19.0.5 ([yum repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html), [apt repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-apt-repo.html))
 * [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
   * Installed in /opt/osu-micro-benchmarks
@@ -126,13 +126,13 @@ The goal of these images is to provide a base MPI development environment that w
 * InfiniBand system development libraries
 * [PSM2 development library](https://github.com/intel/opa-psm2)
 * [OpenFabrics Interfaces](https://github.com/ofiwg/libfabric)
-* [Intel MPI 18.0.2](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-apt-repo.html)
+* Intel MPI 18.0.2([yum repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html), [apt repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-apt-repo.html))
 * [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
   * Installed in /opt/osu-micro-benchmarks
   * Not on system `$PATH`
 * docker-entrypoint.sh - To initialize necessary environment variables for Intel MPI.
-* [A patch for strtok_r](containers/extras/strtok_fix.c) is included in the Ubuntu image to fix a bug due incompatible GNU C Library 
+* [A patch for strtok_r](containers/extras/strtok_fix.c) is included in the Ubuntu image to fix a bug due to incompatible GNU C Library.
 
 Please note that while you can build software in these images, they will **not** run on systems without Omni-Path devices, which probably includes your development system.
 
