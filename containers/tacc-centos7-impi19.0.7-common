@@ -65,6 +65,8 @@ RUN source $MPIVARS_SCRIPT \
 
 RUN echo '#!/bin/bash' > /docker-entrypoint.sh
 RUN echo 'source $MPIVARS_SCRIPT' >> /docker-entrypoint.sh
+RUN echo 'export I_MPI_REMOVED_VAR_WARNING=0' >> /docker-entrypoint.sh
+RUN echo 'export I_MPI_VAR_CHECK_SPELLING=0' >> /docker-entrypoint.sh
 RUN echo 'exec "$@"' >> /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
