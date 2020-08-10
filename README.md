@@ -7,13 +7,15 @@ A curated set of starter containers for building containers to eventually run on
 | [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X | X | X |
 | [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X | X | X |
 | [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |   |   |
-| [tacc/tacc-centos7-impi19.0.5-ib](#infiniband-base-impi-images)        | X |   |   |   |   |   |
-| [tacc/tacc-centos7-impi18.0.2-psm2](#omni-path-base-impi-images)       |   | X |   |   |   |   |
+| [tacc/tacc-centos7-impi19.0.5-ib](#infiniband-base-impi-images)        | X |   |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-centos7-impi18.0.2-psm2](#omni-path-base-impi-images)       |   | X |   |   |   | X |
 | [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X | X | X | X |
 | [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X | X | X | X |
 | [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |   |   |
-| [tacc/tacc-ubuntu18-impi19.0.5-ib](#infiniband-base-impi-images)       | X |   |   |   |   |   |
-| [tacc/tacc-ubuntu18-impi18.0.2-psm2](#omni-path-base-impi-images)      |   | X |   |   |   |   |
+| [tacc/tacc-ubuntu18-impi19.0.5-ib](#infiniband-base-impi-images)       | X |   |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-ubuntu18-impi18.0.2-psm2](#omni-path-base-impi-images)      |   | X |   |   |   | X |
+
+<sup>*</sup>May need `export I_MPI_FABRICS=shm` to run locally.
 
 ## Contents
 
