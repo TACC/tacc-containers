@@ -40,16 +40,16 @@ RUN curl -L https://github.com/intel/opa-psm2/archive/${PSM}_${PSMV}.tar.gz | ta
     && make LIBDIR=/usr/lib/x86_64-linux-gnu install \
     && cd ../ && rm -rf ${PSMD}
 
-# Install impi-19.0.5
+# Install impi-19.0.7
 ARG MAJV=19
 ARG MINV=0
-ARG BV=.5
+ARG BV=.7
 ARG DIR=intel${MAJV}-${MAJV}.${MINV}${BV}
 
 RUN curl -k -L https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB | apt-key add -
 RUN echo deb https://apt.repos.intel.com/mpi all main > /etc/apt/sources.list.d/intel-mpi.list
 RUN apt-get update \
-    && apt-get install -y intel-mpi-20${MAJV}${BV}-075 \
+    && apt-get install -y intel-mpi-20${MAJV}${BV}-102 \
     && docker-clean
 
 ENV MPIVARS_SCRIPT=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
