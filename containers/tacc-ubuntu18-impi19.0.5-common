@@ -48,7 +48,7 @@ ARG BV=0
 RUN curl -LO https://github.com/ofiwg/libfabric/releases/download/v${MAJV}.${MINV}.${BV}/libfabric-${MAJV}.${MINV}.${BV}.tar.bz2 && \
 tar xjf libfabric-${MAJV}.${MINV}.${BV}.tar.bz2 && \
 cd libfabric-${MAJV}.${MINV}.${BV} && \
-./configure --enable-psm2=yes --enable-mlx=yes --prefix=/usr && \
+./configure --enable-psm2=yes --enable-mlx=dl --prefix=/usr && \
 make && make install && cd .. && \
 rm -r libfabric-${MAJV}.${MINV}.${BV} libfabric-${MAJV}.${MINV}.${BV}.tar.bz2 && docker-clean
 
