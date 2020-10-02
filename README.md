@@ -4,18 +4,20 @@ A curated set of starter containers for building containers to eventually run on
 
 | Image                                                             | Frontera | Stampede2 | Maverick2 | Wrangler | Hikari | Local Dev |
 |-|:-:|:-:|:-:|:-:|:-:|:-:|
-| [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |   |   |
-| [tacc/tacc-centos7-impi19.0.5-ib](#infiniband-base-impi-images)        | X |   |   |   |   | X<sup>*</sup> |
-| [tacc/tacc-centos7-impi18.0.2-psm2](#omni-path-base-impi-images)       |   | X |   |   |   | X |
-| [tacc/tacc-centos7-impi19.0.7-common](#common-base-impi-images)        | X | X |   |   |   | X<sup>*</sup> |
-| [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |   |   |
-| [tacc/tacc-ubuntu18-impi19.0.5-ib](#infiniband-base-impi-images)       | X |   |   |   |   | X<sup>*</sup> |
-| [tacc/tacc-ubuntu18-impi18.0.2-psm2](#omni-path-base-impi-images)      |   | X |   |   |   | X |
-| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-impi-images)       | X | X |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-centos7](#minimal-base-images)                                     | X | X | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)           | X |   | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)          |   | X |   |   |   |   |
+| [tacc/tacc-centos7-impi19.0.5-ib](#infiniband-base-intel-mpi-images)          | X |   |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-centos7-impi18.0.2-psm2](#omni-path-base-intel-mpi-images)         |   | X |   |   |   | X |
+| [tacc/tacc-centos7-impi19.0.7-common](#common-base-intel-mpi-images)          | X | X |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-centos7-intel19.1.1-impi19.0.7-common](#common-base-intel-images)  | X | X |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-ubuntu18](#minimal-base-images)                                    | X | X | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)          | X |   | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)         |   | X |   |   |   |   |
+| [tacc/tacc-ubuntu18-impi19.0.5-ib](#infiniband-base-intel-mpi-images)         | X |   |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-ubuntu18-impi18.0.2-psm2](#omni-path-base-intel-mpi-images)        |   | X |   |   |   | X |
+| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-intel-mpi-images)         | X | X |   |   |   | X<sup>*</sup> |
+| [tacc/tacc-ubuntu18-intel19.1.1-impi19.0.7-common](#common-base-intel-images) | X | X |   |   |   | X<sup>*</sup> |
 
 <sup>*</sup>May need `export I_MPI_FABRICS=shm` to run locally.
 
@@ -154,6 +156,32 @@ The goal of these images is to provide a base MPI development environment that w
 * InfiniBand system development libraries
 * [PSM2 development library](https://github.com/intel/opa-psm2)
 * [Mellanox OpenFabrics Enterprise Distribution](https://www.mellanox.com/support/mlnx-ofed-public-repository)
+* Intel MPI 19.0.7 ([yum repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html), [apt repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-apt-repo.html))
+* [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
+* [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
+  * Installed in /opt/osu-micro-benchmarks
+  * Not on system `$PATH`
+* docker-entrypoint.sh - To initialize necessary environment variables for Intel MPI.
+
+Please note that you will need to use `singularity run` to get the `docker-entrypoint.sh` invoked properly under Singularity. 
+
+### Common base Intel images
+
+* tacc/tacc-centos7-intel19.1.1-impi19.0.7-common
+  * [Dockerfile](containers/tacc-centos7-intel19.1.1-impi19.0.7-common) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-intel19.1.1-impi19.0.7-common)
+* tacc/tacc-ubuntu18-intel19.1.1-impi19.0.7-common
+  * [Dockerfile](containers/tacc-ubuntu18-intel19.1.1-impi19.0.7-common) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18-intel19.1.1-impi19.0.7-common)
+
+Each image starts from their respective minimal base, and inherits those base features.
+The goal of these images is to provide a base MPI development environment that will work on both our InfiniBand systems and Omni-Path systems, and will specifically contain the following:
+
+* Version recorded in /etc/tacc-[OS]-intel19.1.1-impi19.0.7-common for troubleshooting
+* InfiniBand system development libraries
+* [PSM2 development library](https://github.com/intel/opa-psm2)
+* [Mellanox OpenFabrics Enterprise Distribution](https://www.mellanox.com/support/mlnx-ofed-public-repository)
+* [Intel Parallel Studio XE 2020 (Update1) Composer Edition](https://software.intel.com/content/www/us/en/develop/tools/parallel-studio-xe.html)
+  * The license file (`/opt/intel/licenses/intel.lic`) only works within TACC's subnetwork
+  * Users can replace with their own license to use Intel compiler locally 
 * Intel MPI 19.0.7 ([yum repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html), [apt repo](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-apt-repo.html))
 * [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
