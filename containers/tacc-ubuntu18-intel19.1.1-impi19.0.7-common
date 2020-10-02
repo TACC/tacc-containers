@@ -1,0 +1,107 @@
+ARG VER=latest
+ARG ORG=tacc
+FROM ${ORG}/tacc-ubuntu18:${VER}
+
+########################################
+# BUILD Args
+########################################
+ARG FLAGS
+ARG VER
+ARG REL
+########################################
+# Configure ENV
+########################################
+ENV CFLAGS=${FLAGS}
+ENV CXXFLAGS=${FLAGS}
+RUN RF=/etc/${REL}-release; echo ${VER} > $RF && chmod a+r $RF
+
+########################################
+# Install mpi
+########################################
+
+# necessities and IB stack
+RUN apt-get update && apt-get install -yq gnupg2 ca-certificates
+RUN curl -k -L http://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add -
+RUN curl -k -L https://linux.mellanox.com/public/repo/mlnx_ofed/latest/ubuntu18.04/mellanox_mlnx_ofed.list > /etc/apt/sources.list.d/mlnx_ofed.list
+RUN apt-get update && \
+    apt-get install -yq --no-install-recommends gfortran bison libibverbs-dev libnuma-dev \
+	libibmad-dev libibumad-dev librdmacm-dev libxml2-dev ca-certificates libfabric-dev \
+        mlnx-ofed-hpc ucx \
+        cpio man-db \
+	&& docker-clean
+
+# Install PSM2
+ARG PSM=PSM2
+ARG PSMV=11.2.78
+ARG PSMD=opa-psm2-${PSM}_${PSMV}
+
+RUN curl -L https://github.com/intel/opa-psm2/archive/${PSM}_${PSMV}.tar.gz | tar -xzf - \
+    && cd ${PSMD} \
+    && make PSM_AVX=1 -j $(nproc --all 2>/dev/null || echo 2) \
+    && make LIBDIR=/usr/lib/x86_64-linux-gnu install \
+    && cd ../ && rm -rf ${PSMD}
+
+# Install Intel compilers
+ADD extras/config.cfg /tmp/icc-config.cfg
+ADD extras/intel.lic /opt/intel/licenses/intel.lic
+
+RUN cd /tmp \
+    && curl http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/16530/parallel_studio_xe_2020_update1_composer_edition.tgz | tar -xzf - \
+    && cd /tmp/parallel_studio_xe_* \
+    && bash ./install.sh --silent=/tmp/icc-config.cfg \
+    && cd .. \
+    && rm -rf parallel_studio_xe_* icc.tgz \
+    && rm /tmp/icc-config.cfg \
+    && docker-clean
+
+# Install impi-19.0.7
+ARG MAJV=19
+ARG MINV=0
+ARG BV=.7
+ARG DIR=intel${MAJV}-${MAJV}.${MINV}${BV}
+
+RUN curl -k -L https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB | apt-key add -
+RUN echo deb https://apt.repos.intel.com/mpi all main > /etc/apt/sources.list.d/intel-mpi.list
+RUN apt-get update \
+    && apt-get install -y intel-mpi-20${MAJV}${BV}-102 \
+    && docker-clean
+
+ENV COMPVARS_SCRIPT="/opt/intel/parallel_studio_xe_2020.1.102/compilers_and_libraries_2020/linux/bin/compilervars.sh -arch intel64 -platform linux"
+ENV I_MPI_LIBRARY_KIND=release_mt
+ENV I_MPI_OFI_LIBRARY_INTERNAL=1
+ENV I_MPI_CC=icc
+ENV I_MPI_CXX=icpc
+ENV I_MPI_F77=ifort
+ENV I_MPI_F90=ifort
+ENV I_MPI_FC=ifort
+
+# Add hello world
+ADD extras/hello.c /tmp/hello.c
+RUN COMPILERVARS_ARCHITECTURE=intel64 . $COMPVARS_SCRIPT \
+    && mpicc /tmp/hello.c -o /usr/local/bin/hellow \
+    && rm /tmp/hello.c \
+    && docker-clean
+
+# Build benchmark programs
+ARG DIR=osu-micro-benchmarks-5.6.2
+RUN COMPILERVARS_ARCHITECTURE=intel64 . $COMPVARS_SCRIPT \
+    && curl http://mvapich.cse.ohio-state.edu/download/mvapich/${DIR}.tar.gz | tar -xzf - \
+    && cd ${DIR} \
+    && ./configure --prefix=/opt/ CC=$(which mpicc) CXX=$(which mpicxx) \
+    && make -j $(nproc --all 2>/dev/null || echo 2) && make install \
+    && mv /opt/libexec/osu-micro-benchmarks/mpi /opt/osu-micro-benchmarks \
+    && rm -rf /opt/libexec && find /opt \
+    && cd ../ && rm -rf ${DIR} && docker-clean
+
+# Test installation
+RUN COMPILERVARS_ARCHITECTURE=intel64 . $COMPVARS_SCRIPT \
+    && mpirun -n 2 hellow
+
+RUN echo '#!/bin/bash' > /docker-entrypoint.sh
+RUN echo 'source $COMPVARS_SCRIPT' >> /docker-entrypoint.sh
+RUN echo 'export I_MPI_REMOVED_VAR_WARNING=0' >> /docker-entrypoint.sh
+RUN echo 'export I_MPI_VAR_CHECK_SPELLING=0' >> /docker-entrypoint.sh
+RUN echo 'exec "$@"' >> /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
