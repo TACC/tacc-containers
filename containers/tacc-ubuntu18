@@ -13,6 +13,8 @@ ARG REL
 # Configure ENV
 ########################################
 
+SHELL ["/bin/bash", "-c"]
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CFLAGS=${FLAGS}
 ENV CXXFLAGS=${FLAGS}

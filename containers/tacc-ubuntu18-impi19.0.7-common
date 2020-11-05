@@ -26,7 +26,7 @@ RUN curl -k -L https://linux.mellanox.com/public/repo/mlnx_ofed/latest/ubuntu18.
 RUN apt-get update && \
     apt-get install -yq --no-install-recommends gfortran bison libibverbs-dev libnuma-dev \
 	libibmad-dev libibumad-dev librdmacm-dev libxml2-dev ca-certificates libfabric-dev \
-        mlnx-ofed-hpc ucx\
+        mlnx-ofed-hpc ucx \
 	&& docker-clean
 
 # Install PSM2
@@ -55,34 +55,21 @@ RUN apt-get update \
 ENV MPIVARS_SCRIPT=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
 ENV I_MPI_LIBRARY_KIND=release_mt
 ENV I_MPI_OFI_LIBRARY_INTERNAL=1
+ENV I_MPI_REMOVED_VAR_WARNING=0
+ENV I_MPI_VAR_CHECK_SPELLING=0
+
+RUN echo '. /opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh' >> /etc/bash.bashrc
+ENV BASH_ENV=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
 
 # Add hello world
 ADD extras/hello.c /tmp/hello.c
-RUN . $MPIVARS_SCRIPT \
-    && mpicc /tmp/hello.c -o /usr/local/bin/hellow \
+RUN mpicc /tmp/hello.c -o /usr/local/bin/hellow \
     && rm /tmp/hello.c \
     && docker-clean
 
 # Build benchmark programs
-ARG DIR=osu-micro-benchmarks-5.6.2
-RUN . $MPIVARS_SCRIPT \
-    && curl http://mvapich.cse.ohio-state.edu/download/mvapich/${DIR}.tar.gz | tar -xzf - \
-    && cd ${DIR} \
-    && ./configure --prefix=/opt/ CC=$(which mpicc) CXX=$(which mpicxx) \
-    && make -j $(nproc --all 2>/dev/null || echo 2) && make install \
-    && mv /opt/libexec/osu-micro-benchmarks/mpi /opt/osu-micro-benchmarks \
-    && rm -rf /opt/libexec && find /opt \
-    && cd ../ && rm -rf ${DIR} && docker-clean
+ADD extras/install_benchmarks.sh /tmp/install_benchmarks.sh
+RUN bash /tmp/install_benchmarks.sh
 
 # Test installation
-RUN . $MPIVARS_SCRIPT \
-    mpirun -n 2 hellow
-
-RUN echo '#!/bin/bash' > /docker-entrypoint.sh
-RUN echo 'source $MPIVARS_SCRIPT' >> /docker-entrypoint.sh
-RUN echo 'export I_MPI_REMOVED_VAR_WARNING=0' >> /docker-entrypoint.sh
-RUN echo 'export I_MPI_VAR_CHECK_SPELLING=0' >> /docker-entrypoint.sh
-RUN echo 'exec "$@"' >> /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
-ENTRYPOINT ["/docker-entrypoint.sh"]
+RUN mpirun -n 2 hellow
