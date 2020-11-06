@@ -7,20 +7,17 @@ A curated set of starter containers for building containers to eventually run on
 | [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X | X |
 | [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X | X |
 | [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |   |
-| [tacc/tacc-centos7-impi19.0.7-common](#common-base-impi-images)        | X | X |   |   | X\* |
+| [tacc/tacc-centos7-impi19.0.7-common](#common-base-impi-images)        | X | X |   |   | X |
 | [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X | X | X |
 | [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X | X | X |
 | [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |   |
-| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-impi-images)       | X | X |   |   | X\* |
-
-\*May need `export I_MPI_FABRICS=shm` to run locally.
+| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-impi-images)       | X | X |   |   | X |
 
 ## Contents
 
 * [Container Descriptions](#container-descriptions)
 * [Running on TACC](#running-on-tacc)
   * [Stampede 2](#stampede-2)
-  * [Hikari](#hikari)
 * [Building from our Containers](#building-from-our-containers)
 * [Performance](#performance)
 * [Troubleshooting](#troubleshooting)
@@ -107,9 +104,15 @@ The goal of these images is to provide a base MPI development environment that w
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
   * Installed in /opt/osu-micro-benchmarks
   * Not on system `$PATH`
-* docker-entrypoint.sh - To initialize necessary environment variables for Intel MPI.
+* `/entry.sh` - To initialize necessary environment variables for Intel MPI.
 
-Please note that you will need to use `singularity run` to get the `docker-entrypoint.sh` invoked properly under Singularity.
+Please note that you will need to use `singularity run` to get the `/entry.sh` invoked properly under Singularity.
+
+## Running with Docker
+
+```
+$ docker run --rm -it tacc/tacc-centos7-impi19.0.7-common:latest mpirun -n 2 hellow
+```
 
 ## Running on TACC
 Mult-node jobs need to be invoked with the system `ibrun`.
@@ -123,8 +126,8 @@ Mult-node jobs need to be invoked with the system `ibrun`.
 2. Move the container to a high-performance filesystem like `$SCRATCH` or maybe `$HOME` <br>
 `mv tacc-centos7-mvapich2.3-psm2_latest.sif $SCRATCH/`
    * You could also `sbcast` the image to `/tmp` inside a job
-3. Launch MPI application <br>
-`cd $SCRATCH; idev -N 2; ibrun singularity exec tacc-centos7-mvapich2.3-psm2_latest.sif hellow`
+3. Launch MPI application with `singularity run` to load the correct environment<br>
+`cd $SCRATCH; idev -N 2; ibrun singularity run tacc-centos7-mvapich2.3-psm2_latest.sif hellow`
 
 ### Stampede 2
 
@@ -136,42 +139,15 @@ $ idev -N 2 -n 2
 $ module load tacc-singularity
 
 # Pull your desired image
-$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest
+$ singularity pull docker://tacc/tacc-centos7-impi19.0.7-common:latest
 
 # Run Hello World
-$ ibrun singularity exec tacc-centos7-mvapich2.3-psm2_latest.sif hellow
+$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
 TACC:  Starting up job 4784577
 TACC:  Starting parallel tasks...
 Hello world!  I am process-1 on host c460-032.stampede2.tacc.utexas.edu
 Hello world!  I am process-0 on host c460-031.stampede2.tacc.utexas.edu
 TACC:  Shutdown complete. Exiting.
-```
-
-### Hikari
-
-```bash
-# Start 2-node compute session
-$ idev -N 2 -n 2
-
-# Load the tacc-singularity module
-$ module load tacc-singularity
-
-# Pull your desired image
-$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-ib:latest
-
-# Run Hello World
-$ ibrun singularity exec tacc-centos7-mvapich2.3-ib_latest.sif hellow
-
-TACC: Starting up job 48655
-TACC: Starting parallel tasks...
-Warning: Process to core binding is enabled and OMP_NUM_THREADS is set to non-zero (1) value
-If your program has OpenMP sections, this can cause over-subscription of cores and consequently poor performance
-To avoid this, please re-run your application after setting MV2_ENABLE_AFFINITY=0
-Use MV2_USE_THREAD_WARNING=0 to suppress this message
-Hello world!  I am process-1 on host c262-170.hikari.tacc.utexas.edu
-Hello world!  I am process-0 on host c262-169.hikari.tacc.utexas.edu
-
-TACC: Shutdown complete. Exiting.
 ```
 
 ## Building from our Containers

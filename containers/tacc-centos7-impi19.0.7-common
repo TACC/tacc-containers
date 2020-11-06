@@ -43,8 +43,10 @@ ENV I_MPI_OFI_LIBRARY_INTERNAL=1
 ENV I_MPI_REMOVED_VAR_WARNING=0
 ENV I_MPI_VAR_CHECK_SPELLING=0
 
-RUN echo '. /opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh' >> /etc/bash.bashrc
 ENV BASH_ENV=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
+RUN echo '. /opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh' >> /etc/bash.bashrc \
+    && echo -e '#!/bin/bash\n. /opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh\nexec "$@"' > /entry.sh \
+    && chmod +x /entry.sh
 
 # Add hello world
 ADD extras/hello.c /tmp/hello.c
