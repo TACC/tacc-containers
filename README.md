@@ -109,7 +109,7 @@ The goal of these images is to provide a base MPI development environment that w
   * Not on system `$PATH`
 * docker-entrypoint.sh - To initialize necessary environment variables for Intel MPI.
 
-Please note that you will need to use `singularity run` to get the `docker-entrypoint.sh` invoked properly under Singularity. 
+Please note that you will need to use `singularity run` to get the `docker-entrypoint.sh` invoked properly under Singularity.
 
 ## Running on TACC
 Mult-node jobs need to be invoked with the system `ibrun`.
@@ -170,7 +170,7 @@ To avoid this, please re-run your application after setting MV2_ENABLE_AFFINITY=
 Use MV2_USE_THREAD_WARNING=0 to suppress this message
 Hello world!  I am process-1 on host c262-170.hikari.tacc.utexas.edu
 Hello world!  I am process-0 on host c262-169.hikari.tacc.utexas.edu
- 
+
 TACC: Shutdown complete. Exiting.
 ```
 
@@ -206,7 +206,7 @@ ADD run_julia.py /usr/local/bin/run_julia.py
 RUN chmod a+rx /usr/local/bin/run_julia.py
 ```
 
-You can either manually recreate this, or take advantage of the provided `Makefile`.
+You can either manually recreate this, or take advantage of the provided [`Makefile`](examples/Makefile).
 
 ```
 $ make ORG=[your dockerhub username] julia
@@ -222,7 +222,7 @@ $ ibrun -np 4 singularity exec julia_latest.sif run_julia.py
 ```
 
 <details><summary>Results</summary>
-	
+
 ```
 $ ibrun -np 4 singularity exec julia_latest.sif run_julia.py
 TACC: Starting up job 48657
@@ -232,7 +232,7 @@ Running COMM
 Running COMM
 Loaded Executor
 c262-169.hikari.tacc.utexas.edu - Julia Set 1600x1200 in 1.92 seconds.
-Running COMM 
+Running COMM
 TACC: Shutdown complete. Exiting.
 
 $ ibrun -np 2 singularity exec julia_latest.sif run_julia.py
@@ -255,7 +255,7 @@ TACC: Shutdown complete. Exiting.
 
 </details>
 
-> The [MPIPoolExecutor](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor) version of `run_julia.py` does not work
+> Note: The [MPIPoolExecutor](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor) version of `run_julia.py` does not work
 
 ## Performance
 
@@ -305,63 +305,34 @@ $ ibrun singularity exec tacc-ubuntu18-mvapich2.3-ib_latest.sif /opt/osu-micro-b
 
 ### Frontera Performance
 
-| Size    | inter-native | inter-centos7 | inter-ubuntu18 | intra-native | intra-centos7 | intra-ubuntu18 | 
-|---------|--------------|---------------|----------------|--------------|---------------|----------------| 
-| 0       | 1.15         | 1.16          | 1.16           | 0.42         | 0.22          | 0.21           | 
-| 1       | 1.14         | 1.2           | 1.19           | 0.4          | 0.22          | 0.21           | 
-| 2       | 1.14         | 1.19          | 1.19           | 0.4          | 0.22          | 0.22           | 
-| 4       | 1.14         | 1.19          | 1.19           | 0.4          | 0.22          | 0.22           | 
-| 8       | 1.13         | 1.19          | 1.19           | 0.4          | 0.22          | 0.21           | 
-| 16      | 1.13         | 1.23          | 1.22           | 0.41         | 0.23          | 0.22           | 
-| 32      | 1.15         | 1.23          | 1.22           | 0.42         | 0.25          | 0.22           | 
-| 64      | 1.2          | 1.23          | 1.22           | 0.42         | 0.27          | 0.24           | 
-| 128     | 1.22         | 1.28          | 1.27           | 0.51         | 0.3           | 0.27           | 
-| 256     | 1.7          | 1.69          | 1.69           | 0.59         | 0.32          | 0.31           | 
-| 512     | 1.53         | 1.77          | 1.78           | 0.79         | 0.4           | 0.4            | 
-| 1024    | 1.7          | 1.93          | 1.93           | 0.88         | 0.51          | 0.49           | 
-| 2048    | 2.25         | 2.3           | 2.31           | 1.03         | 0.66          | 0.63           | 
-| 4096    | 3            | 3.4           | 3.36           | 1.48         | 1             | 0.95           | 
-| 8192    | 3.98         | 4.56          | 4.64           | 1.94         | 1.7           | 1.87           | 
-| 16384   | 5.49         | 7.36          | 7.39           | 3.27         | 3.09          | 3.27           | 
-| 32768   | 9.76         | 9.53          | 9.54           | 4.69         | 4.86          | 5.32           | 
-| 65536   | 12.74        | 12.43         | 12.44          | 7.81         | 4.06          | 4.64           | 
-| 131072  | 18.44        | 21.63         | 21.55          | 13.78        | 6.79          | 8.12           | 
-| 262144  | 33.23        | 32.55         | 32.47          | 25.86        | 12.43         | 15.46          | 
-| 524288  | 56.55        | 54.73         | 54.28          | 60.53        | 26.54         | 32.34          | 
-| 1048576 | 100.07       | 96.91         | 97.03          | 117.08       | 81.49         | 80.25          | 
-| 2097152 | 184.95       | 182.18        | 185.47         | 226.64       | 207.01        | 214.86         | 
-| 4194304 | 356.57       | 352.09        | 352.55         | 447.13       | 431.6         | 437.29         | 
+| Size    | inter-native | inter-centos7 | inter-ubuntu18 | intra-native | intra-centos7 | intra-ubuntu18 |
+|---------|--------------|---------------|----------------|--------------|---------------|----------------|
+| 0       | 1.15         | 1.16          | 1.16           | 0.42         | 0.22          | 0.21           |
+| 1       | 1.14         | 1.2           | 1.19           | 0.4          | 0.22          | 0.21           |
+| 2       | 1.14         | 1.19          | 1.19           | 0.4          | 0.22          | 0.22           |
+| 4       | 1.14         | 1.19          | 1.19           | 0.4          | 0.22          | 0.22           |
+| 8       | 1.13         | 1.19          | 1.19           | 0.4          | 0.22          | 0.21           |
+| 16      | 1.13         | 1.23          | 1.22           | 0.41         | 0.23          | 0.22           |
+| 32      | 1.15         | 1.23          | 1.22           | 0.42         | 0.25          | 0.22           |
+| 64      | 1.2          | 1.23          | 1.22           | 0.42         | 0.27          | 0.24           |
+| 128     | 1.22         | 1.28          | 1.27           | 0.51         | 0.3           | 0.27           |
+| 256     | 1.7          | 1.69          | 1.69           | 0.59         | 0.32          | 0.31           |
+| 512     | 1.53         | 1.77          | 1.78           | 0.79         | 0.4           | 0.4            |
+| 1024    | 1.7          | 1.93          | 1.93           | 0.88         | 0.51          | 0.49           |
+| 2048    | 2.25         | 2.3           | 2.31           | 1.03         | 0.66          | 0.63           |
+| 4096    | 3            | 3.4           | 3.36           | 1.48         | 1             | 0.95           |
+| 8192    | 3.98         | 4.56          | 4.64           | 1.94         | 1.7           | 1.87           |
+| 16384   | 5.49         | 7.36          | 7.39           | 3.27         | 3.09          | 3.27           |
+| 32768   | 9.76         | 9.53          | 9.54           | 4.69         | 4.86          | 5.32           |
+| 65536   | 12.74        | 12.43         | 12.44          | 7.81         | 4.06          | 4.64           |
+| 131072  | 18.44        | 21.63         | 21.55          | 13.78        | 6.79          | 8.12           |
+| 262144  | 33.23        | 32.55         | 32.47          | 25.86        | 12.43         | 15.46          |
+| 524288  | 56.55        | 54.73         | 54.28          | 60.53        | 26.54         | 32.34          |
+| 1048576 | 100.07       | 96.91         | 97.03          | 117.08       | 81.49         | 80.25          |
+| 2097152 | 184.95       | 182.18        | 185.47         | 226.64       | 207.01        | 214.86         |
+| 4194304 | 356.57       | 352.09        | 352.55         | 447.13       | 431.6         | 437.29         |
 
 [Full run logs](run_metrics/frontera)
-
-### Legacy Performance
-
-| Size    | S2 Native | centos7-psm2 | ubuntu18-psm2 | Hikari Native | centos7-ib | ubuntu18-ib |
-|---------|----------:|-------------:|--------------:|--------------:|-----------:|------------:|
-| 0       | 4.09      | 2.63         | 2.95          | 1.27          | 0.23       | 0.19        |
-| 1       | 4.11      | 2.72         | 3.12          | 1.22          | 0.23       | 0.2         |
-| 2       | 4.19      | 2.72         | 3.04          | 1.19          | 0.22       | 0.2         |
-| 4       | 4.13      | 2.63         | 3.05          | 1.16          | 0.22       | 0.21        |
-| 8       | 4.07      | 2.76         | 3.01          | 1.15          | 0.22       | 0.21        |
-| 16      | 5.28      | 3.43         | 3.38          | 1.13          | 0.22       | 0.2         |
-| 32      | 5.28      | 3.42         | 3.46          | 1.51          | 0.24       | 0.21        |
-| 64      | 5.05      | 3.49         | 3.33          | 1.5           | 0.26       | 0.22        |
-| 128     | 5.86      | 3.38         | 3.39          | 1.55          | 0.29       | 0.26        |
-| 256     | 6.04      | 3.61         | 3.52          | 1.59          | 0.33       | 0.29        |
-| 512     | 5.99      | 3.57         | 3.57          | 1.68          | 0.37       | 0.33        |
-| 1024    | 6.2       | 3.86         | 3.7           | 1.83          | 0.44       | 0.4         |
-| 2048    | 6.56      | 4.28         | 4.2           | 2.14          | 0.62       | 0.55        |
-| 4096    | 7.22      | 5.1          | 5.09          | 2.65          | 0.96       | 0.84        |
-| 8192    | 9.22      | 8.11         | 7.32          | 3.74          | 1.68       | 1.56        |
-| 16384   | 11.51     | 10.79        | 10.47         | 4.97          | 3.19       | 2.98        |
-| 32768   | 14.95     | 14.67        | 14.56         | 6.88          | 3          | 3.14        |
-| 65536   | 21.34     | 23.33        | 22.11         | 10.99         | 4.86       | 5.05        |
-| 131072  | 47.5      | 53.72        | 56.2          | 19.21         | 9.34       | 9.61        |
-| 262144  | 69.47     | 71.54        | 85.29         | 73.09         | 21.58      | 21.69       |
-| 524288  | 93.18     | 96.16        | 124.98        | 115.63        | 44.44      | 44.93       |
-| 1048576 | 141.3     | 148.33       | 170.54        | 198.8         | 87.28      | 93.64       |
-| 2097152 | 242.13    | 250.47       | 267.76        | 373.42        | 177.26     | 186.89      |
-| 4194304 | 470.69    | 460.34       | 465.2         | 711.79        | 371.62     | 381.16      |
 
 ## Troubleshooting
 
@@ -417,16 +388,16 @@ psm2_init failed with error: PSM Unresolved internal error
 psm2_init failed with error: PSM Unresolved internal error
 [cli_1]: aborting job:
 Fatal error in MPI_Init: Internal MPI error!, error stack:
-MPIR_Init_thread(490): 
+MPIR_Init_thread(490):
 MPID_Init(395).......: channel initialization failed
 (unknown)(): Internal MPI error!
 [cli_0]: aborting job:
 Fatal error in MPI_Init: Internal MPI error!, error stack:
-MPIR_Init_thread(490): 
+MPIR_Init_thread(490):
 MPID_Init(395).......: channel initialization failed
 (unknown)(): Internal MPI error!
 TACC: MPI job exited with code: 16
- 
+
 TACC: Shutdown complete. Exiting.
 ```
 
@@ -437,12 +408,12 @@ psm2_init failed with error: PSM Unresolved internal error
 psm2_init failed with error: PSM Unresolved internal error
 [cli_0]: aborting job:
 Fatal error in MPI_Init: Internal MPI error!, error stack:
-MPIR_Init_thread(490): 
+MPIR_Init_thread(490):
 MPID_Init(395).......: channel initialization failed
 (unknown)(): Internal MPI error!
 [cli_1]: aborting job:
 Fatal error in MPI_Init: Internal MPI error!, error stack:
-MPIR_Init_thread(490): 
+MPIR_Init_thread(490):
 MPID_Init(395).......: channel initialization failed
 (unknown)(): Internal MPI error!
 ```

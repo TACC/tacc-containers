@@ -15,10 +15,14 @@ ARG REL
 
 SHELL ["/bin/bash", "-c"]
 
+ENV SHELL=/bin/bash
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CFLAGS=${FLAGS}
 ENV CXXFLAGS=${FLAGS}
 RUN RF=/etc/${REL}-release; echo ${VER} > $RF && chmod a+r $RF
+
+RUN echo -e '#!/bin/bash\nexec "$@"' > /entry.sh && chmod +x /entry.sh
+ENTRYPOINT ["/entry.sh"]
 
 ########################################
 # Add docker-clean

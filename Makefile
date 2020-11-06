@@ -15,9 +15,9 @@ BUILD = docker build --build-arg ORG=$(ORG) --build-arg VER=$(VER) --build-arg R
 TAG = docker tag $(ORG)/$@:$(VER) $(ORG)/$@:latest
 PUSH = docker push $(ORG)/$@:$(VER) && docker push $(ORG)/$@:latest
 define TAG_AND_PUSH
-	docker tag $(ORG)/$(1):$(VER) $(ORG)/$(1):latest
-	docker push $(ORG)/$(1):$(VER)
-	docker push $(ORG)/$(1):latest
+	docker tag $(ORG)/$(1):$(VER) $(ORG)/$(1):latest \
+	&& docker push $(ORG)/$(1):$(VER) \
+	&& docker push $(ORG)/$(1):latest
 endef
 
 ####################################
