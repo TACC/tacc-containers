@@ -70,6 +70,7 @@ push-base: | docker
 IMPI := $(shell echo tacc-{ubuntu18,centos7}-impi19.0.7-common)
 MPI := $(shell echo tacc-{ubuntu18,centos7}-mvapich2.3-{ib,psm2})
 MPI_TEST = docker run --rm -it $(ORG)/$@:$(VER) bash -c 'which mpicc && ls /etc/$@-release'
+IMPI_TEST = $(MPI_TEST) && docker run --rm -it $(ORG)/$@:$(VER) mpirun hellow
 # IB
 %-mvapich2.3-ib: containers/%-mvapich2.3-ib | docker %
 	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers
@@ -91,7 +92,7 @@ MPI_TEST = docker run --rm -it $(ORG)/$@:$(VER) bash -c 'which mpicc && ls /etc/
 	#$(TAG) && $(PUSH)
 %-impi19.0.7-common: containers/%-impi19.0.7-common | docker %
 	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers
-	$(MPI_TEST)
+	$(IMPI_TEST)
 	#$(TAG) && $(PUSH)
 #docker tag $(ORG)/$@:$(VER) $(ORG)/$@:stampede2
 #docker push $(ORG)/$@:stampede2

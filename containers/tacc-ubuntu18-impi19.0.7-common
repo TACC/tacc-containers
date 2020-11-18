@@ -52,15 +52,17 @@ RUN apt-get update \
     && apt-get install -y intel-mpi-20${MAJV}${BV}-102 \
     && docker-clean
 
-ENV MPIVARS_SCRIPT=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
-ENV I_MPI_LIBRARY_KIND=release_mt
-ENV I_MPI_OFI_LIBRARY_INTERNAL=1
-ENV I_MPI_REMOVED_VAR_WARNING=0
-ENV I_MPI_VAR_CHECK_SPELLING=0
-
-ENV BASH_ENV=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
-RUN echo '. /opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh' >> /etc/bash.bashrc \
-    && echo -e '#!/bin/bash\n. /opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh\nexec "$@"' > /entry.sh \
+# Configure environment for impi
+ENV MPIVARS_SCRIPT=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh \
+    I_MPI_LIBRARY_KIND=release_mt \
+    I_MPI_OFI_LIBRARY_INTERNAL=1 \
+    I_MPI_REMOVED_VAR_WARNING=0 \
+    I_MPI_VAR_CHECK_SPELLING=0 \
+    BASH_ENV=/opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
+RUN sed -i 's~bin/sh~bin/bash~' $MPIVARS_SCRIPT \
+    && sed -i '/bin\/bash/a \[ "${IMPI_LOADED}" == "1" \] && return' $MPIVARS_SCRIPT \
+    && echo "export IMPI_LOADED=1" >> $MPIVARS_SCRIPT \
+    && echo -e '#!/bin/bash\n. /opt/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh -ofi_internal=1 release_mt\nexec "${@}"' > /entry.sh \
     && chmod +x /entry.sh
 
 # Add hello world

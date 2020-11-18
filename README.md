@@ -2,22 +2,23 @@
 
 A curated set of starter containers for building containers to eventually run on TACC systems.
 
-| Image                                                             | Frontera | Stampede2 | Maverick2 | Wrangler | Local Dev |
+| Image                                                             | Frontera | Stampede2 | Maverick2 | Local Dev |
 |-|:-:|:-:|:-:|:-:|:-:|
-| [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |   |
-| [tacc/tacc-centos7-impi19.0.7-common](#common-base-impi-images)        | X | X |   |   | X |
-| [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |   |
-| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-impi-images)       | X | X |   |   | X |
+| [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X |
+| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X |
+| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |
+| [tacc/tacc-centos7-impi19.0.7-common](#common-base-intel-mpi-images)   | X | X |   | X |
+| [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |
+| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-intel-mpi-images)  | X | X |   | X |
 
 ## Contents
 
 * [Container Descriptions](#container-descriptions)
-* [Running on TACC](#running-on-tacc)
-  * [Stampede 2](#stampede-2)
+* [Running the Containers](#running-the-containers)
+  * [Running on Docker](#running-with-docker)
+  * [Running on TACC](#running-on-tacc)
 * [Building from our Containers](#building-from-our-containers)
 * [Performance](#performance)
 * [Troubleshooting](#troubleshooting)
@@ -38,12 +39,14 @@ They are meant to be extremely light and only contain the following:
 
 * TACC mount points (for legacy containers)
 * [docker-clean](containers/extras/docker-clean) script for cleaning up temporary files between layers
+  * Usage: `RUN apt-get install less && docker-clean`
 * System GCC toolchains (build-essential)
 * Generic `$CFLAGS/$CXXFLAGS` that will work on both _your_ build system and fairly well on ours
   * `-O2 -pipe -march=x86-64 -ftree-vectorize -mtune=core-avx2`
 * Version recorded in /etc/tacc-[OS]-release for troubleshooting
 
-> The architecture flags in our `$CFLAGS` are not more system specific due to the age of the system compilers. As we support newer operating systems, those flags will better match the contemporary hardware at TACC
+> The architecture flags in our `$CFLAGS` are not more system specific due to the age of the system compilers.
+As we support newer operating systems, those flags will better match the contemporary hardware at TACC
 
 ### InfiniBand base MVAPICH2 images
 
@@ -58,6 +61,12 @@ The goal of these images is to provide a base MPI development environment that w
 * Version recorded in /etc/tacc-[OS]-mvapich2.3-ib for troubleshooting
 * InfiniBand system development libraries
 * [MVAPICH2 v2.3](http://mvapich.cse.ohio-state.edu/downloads/)
+  * configured with
+    ```
+    --with-device=ch3 --with-ch3-rank-bits=32 \
+    --enable-fortran=yes --enable-cxx=yes \
+    --enable-romio --enable-fast=O3
+    ```
 * [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
   * Installed in /opt/osu-micro-benchmarks
@@ -77,7 +86,12 @@ The goal of these images is to provide a base MPI development environment that w
 * InfiniBand system development libraries
 * [PSM2 development library](https://github.com/intel/opa-psm2)
 * [MVAPICH2 v2.3](http://mvapich.cse.ohio-state.edu/downloads/)
-  * configured with `--with-device=ch3:psm`
+  * configured with
+    ```
+    --with-device=ch3:psm --with-ch3-rank-bits=32 \
+    --enable-fortran=yes --enable-cxx=yes \
+    --enable-romio --enable-fast=O3
+    ```
 * [`hellow`](containers/extras/hello.c) - A simple "Hello World" test program on the system path
 * [OSU micro benchmarks](http://mvapich.cse.ohio-state.edu/benchmarks/)
   * Installed in /opt/osu-micro-benchmarks
@@ -106,30 +120,68 @@ The goal of these images is to provide a base MPI development environment that w
   * Not on system `$PATH`
 * `/entry.sh` - To initialize necessary environment variables for Intel MPI.
 
-Please note that you will need to use `singularity run` to get the `/entry.sh` invoked properly under Singularity.
+> Please note that you will need to use `singularity run` to get the `/entry.sh` invoked properly under Singularity.
 
-## Running with Docker
+## Running the Containers
+
+### Running on Docker
+
+<details><summary>&#x2705; mvapich2.3-ib images</summary>
+
+```
+$ docker run -e MV2_SMP_USE_CMA=0 --rm -it tacc/tacc-ubuntu18-mvapich2.3-ib:0.0.5 mpirun -n 2 hellow
+
+Hello world!  I am process-1 on host 7984e55ceba6
+Hello world!  I am process-0 on host 7984e55ceba6
+```
+
+> Don't forget the to set `MV2_SMP_USE_CMA=0` when running locally
+
+</details>
+<details><summary>&#x26D4; mvapich2.3-psm2 images</summary>
+
+This container does **not** run locally.
+
+</details>
+<details><summary>&#x2705; impi19.0.7-common images</summary>
 
 ```
 $ docker run --rm -it tacc/tacc-centos7-impi19.0.7-common:latest mpirun -n 2 hellow
+
+WARNING: release_mt library was used but no multi-ep feature was enabled. Please use release library instead.
+Hello world!  I am process-0 on host c05666685143
+Hello world!  I am process-1 on host c05666685143
 ```
 
-## Running on TACC
+> Please ignore this warning
+
+</details>
+
+### Running on TACC
 Mult-node jobs need to be invoked with the system `ibrun`.
 
 > Single-node, multi-core applications _can_ be invoked with the container's `mpirun`, but we do not recommend it unless absolutely necessary.
 
-**NOTE:** large MPI applications must be run on our high-performance filesystems (not $WORK) in the following manner:
+Large MPI applications **must** be run on our high-performance filesystems (not `$WORK`) in the following manner:
 
 1. Pull container once, using a single process <br>
-`idev -N 1; singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest`
+```
+[login]$ idev -N 1
+[compute]$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest
+```
+
 2. Move the container to a high-performance filesystem like `$SCRATCH` or maybe `$HOME` <br>
-`mv tacc-centos7-mvapich2.3-psm2_latest.sif $SCRATCH/`
-   * You could also `sbcast` the image to `/tmp` inside a job
+```
+mv tacc-centos7-mvapich2.3-psm2_latest.sif $SCRATCH/
+```
+> For large MPI jobs, consider using [`sbcast`](https://slurm.schedmd.com/sbcast.html) to stage the image to `/tmp`
+
 3. Launch MPI application with `singularity run` to load the correct environment<br>
 `cd $SCRATCH; idev -N 2; ibrun singularity run tacc-centos7-mvapich2.3-psm2_latest.sif hellow`
 
-### Stampede 2
+#### Running on Stampede 2
+
+<details><summary>impi19.0.7-common images</summary>
 
 ```bash
 # Start 2-node compute session
@@ -149,6 +201,89 @@ Hello world!  I am process-1 on host c460-032.stampede2.tacc.utexas.edu
 Hello world!  I am process-0 on host c460-031.stampede2.tacc.utexas.edu
 TACC:  Shutdown complete. Exiting.
 ```
+
+</details><details><summary>mvapich2.3-psm2 images</summary>
+
+```bash
+# Start 2-node compute session
+$ idev -N 2 -n 2
+
+# Load the tacc-singularity module
+$ module load tacc-singularity
+
+# Pull your desired image
+$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest
+
+# Run Hello World
+$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
+TACC:  Starting up job 4784577
+TACC:  Starting parallel tasks...
+Hello world!  I am process-1 on host c460-032.stampede2.tacc.utexas.edu
+Hello world!  I am process-0 on host c460-031.stampede2.tacc.utexas.edu
+TACC:  Shutdown complete. Exiting.
+```
+
+</details>
+
+#### Running on Frontera
+
+<details><summary>impi19.0.7-common images</summary>
+
+```bash
+# Start 2-node compute session
+$ idev -N 2 -n 2
+
+# Load the tacc-singularity module
+$ module load tacc-singularity
+
+# Pull your desired image
+$ singularity pull docker://tacc/tacc-centos7-impi19.0.7-common:latest
+
+# Run Hello World
+$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
+TACC:  Starting up job 2019250
+TACC:  Starting parallel tasks...
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+WARNING: release_mt library was used but no multi-ep feature was enabled. Please use release library instead.
+Hello world!  I am process-0 on host c191-074.frontera.tacc.utexas.edu
+Hello world!  I am process-1 on host c191-081.frontera.tacc.utexas.edu
+TACC:  Shutdown complete. Exiting.
+```
+
+> The ERROR messages can be ignored or eliminated by unloading the xalt module.
+
+</details><details><summary>mvapich2.3-psm2 images</summary>
+
+```bash
+# Start 2-node compute session
+$ idev -N 2 -n 2
+
+# Load the tacc-singularity module
+$ module load tacc-singularity
+
+# Pull your desired image
+$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-ib:latest
+
+# Run Hello World
+$ ibrun singularity run tacc-centos7-mvapich2.3-ib_latest.sif hellow
+TACC:  Starting up job 2019250
+TACC:  Starting parallel tasks...
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+Warning: Process to core binding is enabled and OMP_NUM_THREADS is set to non-zero (1) value
+If your program has OpenMP sections, this can cause over-subscription of cores and consequently poor performance
+To avoid this, please re-run your application after setting MV2_ENABLE_AFFINITY=0
+Use MV2_USE_THREAD_WARNING=0 to suppress this message
+Hello world!  I am process-1 on host c191-081.frontera.tacc.utexas.edu
+Hello world!  I am process-0 on host c191-074.frontera.tacc.utexas.edu
+TACC:  Shutdown complete. Exiting.
+```
+
+> The ERROR messages can be ignored or eliminated by unloading the xalt module. The MVAPICH warning can also be suppressed by setting the appropriate environment variables.
+
+</details>
 
 ## Building from our Containers
 
@@ -317,7 +452,7 @@ TODO
 ## Known Issues
 
 * [mpi4py.futures](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html) fails on `*psm2` - please submit a pull request if you find a solution
-* [MPIPoolExecutor](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor) failes on `*ib` - please submit a pull request if you find a solution
+* [MPIPoolExecutor](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor) fails on `*ib` - please submit a pull request if you find a solution
   * Still true with mvapich 2.3.1 in release 0.0.3
 * `*psm2` containers cannot run locally
 * Running with `MV2_ENABLE_AFFINITY=0` in your environment is sometimes required for some code if it fails and you see the following warning <blockquote>
@@ -331,7 +466,7 @@ Use MV2_USE_THREAD_WARNING=0 to suppress this message
 
 ## Frequently asked questions
 
-<details><summary>What happens if I run a `*ib` container on Stampede2?</summary>
+<details><summary>What happens if I run a `*ib` container on an OmniPath system like Stampede2?</summary>
 
 Multi-node
 ```
@@ -352,7 +487,7 @@ Hello world!  I am process-1 on host c460-031.stampede2.tacc.utexas.edu
 ```
 
 </details>
-<details><summary>What happens if I run a `*psm2` container on Hikari?</summary>
+<details><summary>What happens if I run a `*psm2` container on an InfiniBand system?</summary>
 
 
 Multi-node
