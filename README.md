@@ -17,7 +17,7 @@ A curated set of starter containers for building containers to eventually run on
 
 * [Container Descriptions](#container-descriptions)
 * [Running the Containers](#running-the-containers)
-  * [Running on Docker](#running-with-docker)
+  * [Running on Docker](#running-on-docker)
   * [Running on TACC](#running-on-tacc)
 * [Building from our Containers](#building-from-our-containers)
 * [Performance](#performance)
