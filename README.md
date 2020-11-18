@@ -3,7 +3,7 @@
 A curated set of starter containers for building containers to eventually run on TACC systems.
 
 | Image                                                             | Frontera | Stampede2 | Maverick2 | Local Dev |
-|-|:-:|:-:|:-:|:-:|:-:|
+|-|:-:|:-:|:-:|:-:|
 | [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X |
 | [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X |
 | [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |
