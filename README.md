@@ -13,6 +13,8 @@ A curated set of starter containers for building containers to eventually run on
 | [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |
 | [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-intel-mpi-images)  | X | X |   | X |
 
+> The singularity version of these containers should be invoked with `singularity run`, and any modifications to `ENTRYPOINT` on the docker side may disrupt function.
+
 ## Contents
 
 * [Container Descriptions](#container-descriptions)
@@ -168,60 +170,78 @@ Large MPI applications **must** be run on our high-performance filesystems (not 
 ```
 [login]$ idev -N 1
 [compute]$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest
+[compute]$ exit
+[login]$
 ```
 
 2. Move the container to a high-performance filesystem like `$SCRATCH` or maybe `$HOME` <br>
 ```
-mv tacc-centos7-mvapich2.3-psm2_latest.sif $SCRATCH/
+[login]$ mv tacc-centos7-mvapich2.3-psm2_latest.sif $SCRATCH/
 ```
 > For large MPI jobs, consider using [`sbcast`](https://slurm.schedmd.com/sbcast.html) to stage the image to `/tmp`
 
 3. Launch MPI application with `singularity run` to load the correct environment<br>
-`cd $SCRATCH; idev -N 2; ibrun singularity run tacc-centos7-mvapich2.3-psm2_latest.sif hellow`
+```
+[login]$ cd $SCRATCH
+[login]$ idev -N 2
+[compute]$ ibrun singularity run tacc-centos7-mvapich2.3-psm2_latest.sif hellow
+```
 
 #### Running on Stampede 2
 
 <details><summary>impi19.0.7-common images</summary>
 
-```bash
+```
 # Start 2-node compute session
-$ idev -N 2 -n 2
+[login]$ idev -N 2 -n 2
 
 # Load the tacc-singularity module
-$ module load tacc-singularity
+[compute]$ module load tacc-singularity
 
 # Pull your desired image
-$ singularity pull docker://tacc/tacc-centos7-impi19.0.7-common:latest
+[compute]$ singularity pull docker://tacc/tacc-centos7-impi19.0.7-common:latest
 
 # Run Hello World
-$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
-TACC:  Starting up job 4784577
+[compute]$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
+TACC:  Starting up job 6848404
 TACC:  Starting parallel tasks...
-Hello world!  I am process-1 on host c460-032.stampede2.tacc.utexas.edu
-Hello world!  I am process-0 on host c460-031.stampede2.tacc.utexas.edu
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+WARNING: release_mt library was used but no multi-ep feature was enabled. Please use release library instead.
+Hello world!  I am process-1 on host c460-003.stampede2.tacc.utexas.edu
+Hello world!  I am process-0 on host c460-002.stampede2.tacc.utexas.edu
 TACC:  Shutdown complete. Exiting.
 ```
+
+> The ERROR messages can be ignored or eliminated by unloading the xalt module.
 
 </details><details><summary>mvapich2.3-psm2 images</summary>
 
-```bash
+```
 # Start 2-node compute session
-$ idev -N 2 -n 2
+[login]$ idev -N 2 -n 2
 
 # Load the tacc-singularity module
-$ module load tacc-singularity
+[compute]$ module load tacc-singularity
 
 # Pull your desired image
-$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest
+[compute]$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-psm2:latest
 
 # Run Hello World
-$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
-TACC:  Starting up job 4784577
+[compute]$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
+TACC:  Starting up job 6848404
 TACC:  Starting parallel tasks...
-Hello world!  I am process-1 on host c460-032.stampede2.tacc.utexas.edu
-Hello world!  I am process-0 on host c460-031.stampede2.tacc.utexas.edu
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
+WARNING: release_mt library was used but no multi-ep feature was enabled. Please use release library instead.
+Hello world!  I am process-0 on host c460-002.stampede2.tacc.utexas.edu
+Hello world!  I am process-1 on host c460-003.stampede2.tacc.utexas.edu
 TACC:  Shutdown complete. Exiting.
 ```
+
+> The ERROR messages can be ignored or eliminated by unloading the xalt module.
 
 </details>
 
@@ -229,18 +249,18 @@ TACC:  Shutdown complete. Exiting.
 
 <details><summary>impi19.0.7-common images</summary>
 
-```bash
+```
 # Start 2-node compute session
-$ idev -N 2 -n 2
+[login]$ idev -N 2 -n 2
 
 # Load the tacc-singularity module
-$ module load tacc-singularity
+[compute]$ module load tacc-singularity
 
 # Pull your desired image
-$ singularity pull docker://tacc/tacc-centos7-impi19.0.7-common:latest
+[compute]$ singularity pull docker://tacc/tacc-centos7-impi19.0.7-common:latest
 
 # Run Hello World
-$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
+[compute]$ ibrun singularity run tacc-centos7-impi19.0.7-common_latest.sif hellow
 TACC:  Starting up job 2019250
 TACC:  Starting parallel tasks...
 ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
@@ -254,20 +274,20 @@ TACC:  Shutdown complete. Exiting.
 
 > The ERROR messages can be ignored or eliminated by unloading the xalt module.
 
-</details><details><summary>mvapich2.3-psm2 images</summary>
+</details><details><summary>mvapich2.3-ib images</summary>
 
-```bash
+```
 # Start 2-node compute session
-$ idev -N 2 -n 2
+[login]$ idev -N 2 -n 2
 
 # Load the tacc-singularity module
-$ module load tacc-singularity
+[compute]$ module load tacc-singularity
 
 # Pull your desired image
-$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-ib:latest
+[compute]$ singularity pull docker://tacc/tacc-centos7-mvapich2.3-ib:latest
 
 # Run Hello World
-$ ibrun singularity run tacc-centos7-mvapich2.3-ib_latest.sif hellow
+[compute]$ ibrun singularity run tacc-centos7-mvapich2.3-ib_latest.sif hellow
 TACC:  Starting up job 2019250
 TACC:  Starting parallel tasks...
 ERROR: ld.so: object '/opt/apps/xalt/xalt/lib64/libxalt_init.so' from LD_PRELOAD cannot be preloaded: ignored.
@@ -296,6 +316,8 @@ To build a container to run `run_julia.py` on an InfiniBand system at TACC, a ne
   * pip/setuptools
   * mpi4py
 * Adds the `run_julia.py` program and updates the permissions
+
+> Do not modify the `ENTRYPOINT` of these containers. Otherwise, the MPI environments may not work correctly.
 
 ```
 ARG VER=latest
