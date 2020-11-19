@@ -351,13 +351,13 @@ After the image is done being pushed to dockerhub, you can pull it down to the I
 $ idev -N 2 -n 4
 $ module load tacc-singularity
 $ singularity pull docker://gzynda/julia:latest
-$ ibrun -np 4 singularity exec julia_latest.sif run_julia.py
+$ ibrun -np 4 singularity run julia_latest.sif run_julia.py
 ```
 
 <details><summary>Results</summary>
 
 ```
-$ ibrun -np 4 singularity exec julia_latest.sif run_julia.py
+$ ibrun -np 4 singularity run julia_latest.sif run_julia.py
 TACC: Starting up job 48657
 TACC: Starting parallel tasks...
 Running COMM
@@ -368,7 +368,7 @@ c262-169.hikari.tacc.utexas.edu - Julia Set 1600x1200 in 1.92 seconds.
 Running COMM
 TACC: Shutdown complete. Exiting.
 
-$ ibrun -np 2 singularity exec julia_latest.sif run_julia.py
+$ ibrun -np 2 singularity run julia_latest.sif run_julia.py
 TACC: Starting up job 48657
 TACC: Starting parallel tasks...
 Running COMM
@@ -377,7 +377,7 @@ c262-169.hikari.tacc.utexas.edu - Julia Set 1600x1200 in 5.72 seconds.
 Running COMM
 TACC: Shutdown complete. Exiting.
 
-$ ibrun -np 1 singularity exec julia_latest.sif run_julia.py
+$ ibrun -np 1 singularity run julia_latest.sif run_julia.py
 TACC: Starting up job 48657
 TACC: Starting parallel tasks...
 Running COMM
@@ -410,10 +410,10 @@ $ module load tacc-singularity
 $ ibrun osu_latency
 
 # centos7
-$ ibrun singularity exec tacc-centos7-mvapich2.3-psm2_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
+$ ibrun singularity run tacc-centos7-mvapich2.3-psm2_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
 
 # ubuntu18
-$ ibrun singularity exec tacc-ubuntu18-mvapich2.3-psm2_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
+$ ibrun singularity run tacc-ubuntu18-mvapich2.3-psm2_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
 ```
 
 </details>
@@ -428,10 +428,10 @@ $ module load tacc-singularity
 $ ibrun osu_latency
 
 # centos7
-$ ibrun singularity exec tacc-centos7-mvapich2.3-ib_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
+$ ibrun singularity run tacc-centos7-mvapich2.3-ib_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
 
 # ubuntu18
-$ ibrun singularity exec tacc-ubuntu18-mvapich2.3-ib_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
+$ ibrun singularity run tacc-ubuntu18-mvapich2.3-ib_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
 ```
 
 </details>
@@ -492,7 +492,7 @@ Use MV2_USE_THREAD_WARNING=0 to suppress this message
 
 Multi-node
 ```
-gzynda@Sc460-031[osu-bench]$ ibrun singularity exec tacc-centos7-mvapich2.3-ib_0.0.2.sif hellow
+gzynda@Sc460-031[osu-bench]$ ibrun singularity run tacc-centos7-mvapich2.3-ib_0.0.2.sif hellow
 TACC:  Starting up job 4784577
 TACC:  Starting parallel tasks...
 [c460-032.stampede2.tacc.utexas.edu:mpi_rank_1][error_sighandler] Caught error: Segmentation fault (signal 11)
@@ -503,7 +503,7 @@ TACC:  Shutdown complete. Exiting.
 
 Single-node
 ```
-gzynda@Sc460-031[osu-bench]$ singularity exec tacc-centos7-mvapich2.3-ib_0.0.2.sif bash -c 'mpirun -n 2 -launcher fork hellow'
+gzynda@Sc460-031[osu-bench]$ singularity run tacc-centos7-mvapich2.3-ib_0.0.2.sif bash -c 'mpirun -n 2 -launcher fork hellow'
 Hello world!  I am process-0 on host c460-031.stampede2.tacc.utexas.edu
 Hello world!  I am process-1 on host c460-031.stampede2.tacc.utexas.edu
 ```
@@ -514,7 +514,7 @@ Hello world!  I am process-1 on host c460-031.stampede2.tacc.utexas.edu
 
 Multi-node
 ```
-c262-169.hikari(44)$ ibrun singularity exec tacc-centos7-mvapich2.3-psm2_0.0.2.sif hellow
+c262-169.hikari(44)$ ibrun singularity run tacc-centos7-mvapich2.3-psm2_0.0.2.sif hellow
 TACC: Starting up job 48655
 TACC: Starting parallel tasks...
 psm2_init failed with error: PSM Unresolved internal error
@@ -536,7 +536,7 @@ TACC: Shutdown complete. Exiting.
 
 Single-node
 ```
-c262-169.hikari(51)$ singularity exec tacc-centos7-mvapich2.3-psm2_0.0.2.sif bash -c 'MV2_USE_CMA=0; mpirun -n 2 -launcher fork hellow'
+c262-169.hikari(51)$ singularity run tacc-centos7-mvapich2.3-psm2_0.0.2.sif bash -c 'MV2_USE_CMA=0; mpirun -n 2 -launcher fork hellow'
 psm2_init failed with error: PSM Unresolved internal error
 psm2_init failed with error: PSM Unresolved internal error
 [cli_0]: aborting job:
