@@ -11,7 +11,7 @@ EDR := maverick wrangler hikari maverick2
 OPA := stampede2
 SYS := $(EDR) $(OPA) ls5
 
-BUILD = docker build --build-arg ORG=$(ORG) --build-arg VER=$(VER) --build-arg REL=$(@) -t $(ORG)/$@:$(VER) -f containers/$@
+BUILD = docker build --build-arg ORG=$(ORG) --build-arg VER=$(VER) --build-arg REL=$(@) -t $(ORG)/$@:$(VER) -f containers/$(subst -ppc64le,,$@)
 TAG = docker tag $(ORG)/$@:$(VER) $(ORG)/$@:latest
 PUSH = docker push $(ORG)/$@:$(VER) && docker push $(ORG)/$@:latest
 define TAG_AND_PUSH
@@ -26,6 +26,7 @@ endef
 DEFAULT := -O2 -pipe -march=x86-64 -ftree-vectorize
 # Haswell doesn't exist in all gcc versions
 TACC := $(DEFAULT) -mtune=core-avx2
+PPC := -mcpu=power8 -O2 -pipe
 
 ####################################
 # Sanity checks
@@ -42,18 +43,24 @@ containers/extras/osu-micro-benchmarks-5.4.4.tar.gz:
 ####################################
 # Base Images
 ####################################
-BASE := $(shell echo tacc-{ubuntu18,centos7})
+BASE := $(shell echo tacc-{ubuntu18,centos7} tacc-centos7-ppc64le)
 BASE_TEST = docker run --rm -it $(ORG)/$@:$(VER) bash -c 'echo $$CFLAGS | grep "pipe" && ls /etc/$@-release'
 bionic:
 	docker pull ubuntu:bionic
 centos7:
 	docker pull centos:7
+centos7-ppc64le:
+	docker pull ppc64le/centos:7
 tacc-ubuntu18: containers/tacc-ubuntu18 | docker bionic
 	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers &> $@.log
 	$(BASE_TEST) >> $@.log 2>&1
 	#$(TAG) >> $@.log 2>&1 && $(PUSH) >> $@.log 2>&1
 tacc-centos7: containers/tacc-centos7 | docker centos7
 	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers &> $@.log
+	$(BASE_TEST) >> $@.log 2>&1
+	#$(TAG) >> $@.log 2>&1 && $(PUSH) >> $@.log 2>&1
+tacc-centos7-ppc64le: containers/tacc-centos7 | docker centos7-ppc64le
+	$(BUILD) --build-arg ARCH="ppc64le/" --build-arg FLAGS="$(PPC)" ./containers &> $@.log
 	$(BASE_TEST) >> $@.log 2>&1
 	#$(TAG) >> $@.log 2>&1 && $(PUSH) >> $@.log 2>&1
 base-images: $(BASE)
@@ -68,12 +75,16 @@ push-base: | docker
 ####################################
 #IMPI := $(shell echo tacc-{ubuntu18,centos7}-impi{18.0.2-psm2,19.0.5-ib,19.0.7-common})
 IMPI := $(shell echo tacc-{ubuntu18,centos7}-impi19.0.7-common)
-MPI := $(shell echo tacc-{ubuntu18,centos7}-mvapich2.3-{ib,psm2})
+MPI := $(shell echo tacc-{ubuntu18,centos7}-mvapich2.3-{ib,psm2} tacc-centos7-ppc64le-mvapich2.3-ib)
 MPI_TEST = docker run --rm -it $(ORG)/$@:$(VER) bash -c 'which mpicc && ls /etc/$@-release'
 IMPI_TEST = $(MPI_TEST) && docker run --rm -it $(ORG)/$@:$(VER) mpirun hellow
 # IB
 %-mvapich2.3-ib: containers/%-mvapich2.3-ib | docker %
 	$(BUILD) --build-arg FLAGS="$(TACC)" ./containers
+	$(MPI_TEST)
+	#$(TAG) && $(PUSH)
+%-ppc64le-mvapich2.3-ib: containers/%-mvapich2.3-ib | docker %-ppc64le
+	$(BUILD) --build-arg FLAGS="$(PPC)" --build-arg ARCH="-ppc64le" ./containers
 	$(MPI_TEST)
 	#$(TAG) && $(PUSH)
 # PSM2

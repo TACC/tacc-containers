@@ -1,5 +1,6 @@
 # Use 18.04 LTS
-FROM ubuntu:bionic
+ARG ARCH
+FROM ${ARCH}ubuntu:bionic
 
 ########################################
 # BUILD Args

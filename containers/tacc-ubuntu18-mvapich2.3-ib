@@ -1,6 +1,7 @@
 ARG VER=latest
 ARG ORG=tacc
-FROM ${ORG}/tacc-ubuntu18:${VER}
+ARG ARCH
+FROM ${ORG}/tacc-ubuntu18${ARCH}:${VER}
 
 ########################################
 # BUILD Args

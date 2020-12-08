@@ -1,0 +1,31 @@
+c001-005.longhorn(1002)$ ibrun tacc-centos7-ppc64le-mvapich2.3-ib_0.0.5.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
+TACC:  Starting up job 49973
+TACC:  Setting up parallel environment for MVAPICH2+mpispawn.
+TACC:  Starting parallel tasks...
+# OSU MPI Latency Test v5.6.2
+# Size          Latency (us)
+0                       0.51
+1                       0.51
+2                       0.51
+4                       0.52
+8                       0.51
+16                      0.51
+32                      0.54
+64                      0.56
+128                     0.61
+256                     0.63
+512                     0.77
+1024                    1.08
+2048                    1.43
+4096                    1.70
+8192                    2.62
+16384                   4.29
+32768                   8.09
+65536                   5.84
+131072                  7.84
+262144                 11.89
+524288                 19.53
+1048576                34.53
+2097152                63.32
+4194304               142.96
+TACC:  Shutdown complete. Exiting.

@@ -1,0 +1,36 @@
+c001-007.longhorn(1002)$ ml mvapich2-gdr
+
+Lmod is automatically replacing "spectrum_mpi/10.3.0" with
+"mvapich2-gdr/2.3.4".
+
+c001-007.longhorn(1003)$ ibrun tacc-centos7-ppc64le-mvapich2.3-ib_0.0.5.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
+TACC:  Starting up job 49972
+TACC:  Setting up parallel environment for MVAPICH2+mpispawn.
+TACC:  Starting parallel tasks...
+# OSU MPI Latency Test v5.6.2
+# Size          Latency (us)
+0                       1.40
+1                       1.50
+2                       1.50
+4                       1.50
+8                       1.49
+16                      1.57
+32                      1.56
+64                      1.56
+128                     1.63
+256                     1.97
+512                     2.04
+1024                    2.31
+2048                    2.81
+4096                    3.65
+8192                    5.22
+16384                   7.18
+32768                  10.75
+65536                  12.43
+131072                 17.92
+262144                 28.54
+524288                 49.70
+1048576                92.00
+2097152               176.63
+4194304               346.33
+TACC:  Shutdown complete. Exiting.

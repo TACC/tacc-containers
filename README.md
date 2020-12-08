@@ -2,18 +2,22 @@
 
 A curated set of starter containers for building containers to eventually run on TACC systems.
 
-| Image                                                             | Frontera | Stampede2 | Maverick2 | Local Dev |
-|-|:-:|:-:|:-:|:-:|
-| [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X | X |
-| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X | X |
-| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |
-| [tacc/tacc-centos7-impi19.0.7-common](#common-base-intel-mpi-images)   | X | X |   | X |
-| [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X | X |
-| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |
-| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-intel-mpi-images)  | X | X |   | X |
+| Image                                                             | Frontera | Stampede2 | Maverick2 | Longhorn | Local Dev |
+|-|:-:|:-:|:-:|:-:|:-:|
+| [tacc/tacc-centos7](#minimal-base-images)                              | X | X | X |   | X |
+| [tacc/tacc-centos7-ppc64le](#minimal-base-images)                              |   |   |   | X | X |
+| [tacc/tacc-centos7-mvapich2.3-ib](#infiniband-base-mvapich2-images)    | X |   | X |   | X |
+| [tacc/tacc-centos7-ppc64le-mvapich2.3-ib](#infiniband-base-mvapich2-images)    |   |   |   | X* | X |
+| [tacc/tacc-centos7-mvapich2.3-psm2](#omni-path-base-mvapich2-images)   |   | X |   |   |   |
+| [tacc/tacc-centos7-impi19.0.7-common](#common-base-intel-mpi-images)   | X | X |   |   | X |
+| [tacc/tacc-ubuntu18](#minimal-base-images)                             | X | X | X |   | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-ib](#infiniband-base-mvapich2-images)   | X |   | X |   | X |
+| [tacc/tacc-ubuntu18-mvapich2.3-psm2](#omni-path-base-mvapich2-images)  |   | X |   |   |   |
+| [tacc/tacc-ubuntu18-impi19.0.7-common](#common-base-intel-mpi-images)  | X | X |   |   | X |
 
 > The singularity version of these containers should be invoked with `singularity run`, and any modifications to `ENTRYPOINT` on the docker side may disrupt function.
+>
+> \* Must be used with the `mvapich2-gdr` module
 
 ## Contents
 
@@ -35,6 +39,10 @@ A curated set of starter containers for building containers to eventually run on
   * [Dockerfile](containers/tacc-centos7) - [Container](https://hub.docker.com/r/tacc/tacc-centos7)
 * tacc/tacc-ubuntu18
   * [Dockerfile](containers/tacc-ubuntu18) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18)
+* tacc/tacc-centos7-ppc64le
+  * [Dockerfile](containers/tacc-centos7) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-ppc64le)
+
+> ubuntu18 [does not support](https://packages.ubuntu.com/bionic/libfabric-dev) IB libraries for ppc64le architectures
 
 These are the starting point for our downstream images, and the operating systems we support.
 They are meant to be extremely light and only contain the following:
@@ -44,7 +52,8 @@ They are meant to be extremely light and only contain the following:
   * Usage: `RUN apt-get install less && docker-clean`
 * System GCC toolchains (build-essential)
 * Generic `$CFLAGS/$CXXFLAGS` that will work on both _your_ build system and fairly well on ours
-  * `-O2 -pipe -march=x86-64 -ftree-vectorize -mtune=core-avx2`
+  * **x86_64 images** `-O2 -pipe -march=x86-64 -ftree-vectorize -mtune=core-avx2`
+  * **ppc64le images** `-mcpu=power8 -O2 -pipe`
 * Version recorded in /etc/tacc-[OS]-release for troubleshooting
 
 > The architecture flags in our `$CFLAGS` are not more system specific due to the age of the system compilers.
@@ -56,6 +65,9 @@ As we support newer operating systems, those flags will better match the contemp
   * [Dockerfile](containers/tacc-centos7-mvapich2.3-ib) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-mvapich2.3-ib)
 * tacc/tacc-ubuntu18-mvapich2.3-ib
   * [Dockerfile](containers/tacc-ubuntu18-mvapich2.3-ib) - [Container](https://hub.docker.com/r/tacc/tacc-ubuntu18-mvapich2.3-ib)
+* tacc/tacc-centos7-ppc64le-mvapich2.3-ib
+  * [Dockerfile](containers/tacc-centos7-mvapich2.3-ib) - [Container](https://hub.docker.com/r/tacc/tacc-centos7-ppc64le-mvapich2.3-ib)
+  * Must be used with the `mvapich2-gdr` module on Longhorn
 
 Each image starts from their respective minimal base, and inherits those base features.
 The goal of these images is to provide a base MPI development environment that will work on our InfiniBand systems, and will specifically contain the following:
@@ -399,43 +411,6 @@ Performance was measured using [osu_latency](http://mvapich.cse.ohio-state.edu/b
 
  * `/opt/osu-micro-benchmarks/pt2pt/osu_latency`
 
-<details><summary>Stampede 2 Run commands</summary>
-
-```
-# Prepare compute environment
-$ idev -N 2 -n 2
-$ module load tacc-singularity
-
-# Native
-$ ibrun osu_latency
-
-# centos7
-$ ibrun singularity run tacc-centos7-mvapich2.3-psm2_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
-
-# ubuntu18
-$ ibrun singularity run tacc-ubuntu18-mvapich2.3-psm2_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
-```
-
-</details>
-<details><summary>Hikari Run commands</summary>
-
-```
-# Prepare compute environment
-$ idev -N 2 -n 2
-$ module load tacc-singularity
-
-# Native
-$ ibrun osu_latency
-
-# centos7
-$ ibrun singularity run tacc-centos7-mvapich2.3-ib_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
-
-# ubuntu18
-$ ibrun singularity run tacc-ubuntu18-mvapich2.3-ib_latest.sif /opt/osu-micro-benchmarks/pt2pt/osu_latency
-```
-
-</details>
-
 ### Frontera Performance
 
 | Size    | inter-native | inter-centos7 | inter-ubuntu18 | intra-native | intra-centos7 | intra-ubuntu18 |
@@ -477,6 +452,7 @@ TODO
 * [MPIPoolExecutor](https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor) fails on `*ib` - please submit a pull request if you find a solution
   * Still true with mvapich 2.3.1 in release 0.0.3
 * `*psm2` containers cannot run locally
+* The `tacc-centos7-ppc64le-mvapich2.3-ib` container is not compatible with Longhorn's default spectrum MPI and only works with the `mvapich2-gdr` module.
 * Running with `MV2_ENABLE_AFFINITY=0` in your environment is sometimes required for some code if it fails and you see the following warning <blockquote>
 ```
 Warning: Process to core binding is enabled and OMP_NUM_THREADS is set to non-zero (1) value
