@@ -1,6 +1,7 @@
 ARG VER=latest
 ARG ORG=tacc
-FROM ${ORG}/tacc-centos7:${VER}
+ARG ARCH
+FROM ${ORG}/tacc-centos7${ARCH}:${VER}
 
 ########################################
 # BUILD Args
